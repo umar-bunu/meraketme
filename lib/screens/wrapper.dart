@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
 class Wrapper extends StatefulWidget {
-  Wrapper({Key? key}) : super(key: key);
+  const Wrapper({Key? key}) : super(key: key);
 
   @override
   _WrapperState createState() => _WrapperState();
@@ -19,17 +19,23 @@ class _WrapperState extends State<Wrapper> {
     try {
       await Firebase.initializeApp();
       FirebaseAuth.instance.currentUser == null
-          ? Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (BuildContext context) => Login()))
-          : Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (BuildContext context) => Home()));
+          ? Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const Login()))
+          : Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const Home()));
     } catch (e) {
       print(e.toString());
       showDialog(
           context: context,
           builder: (BuildContext context) {
+            print('something went wrong');
             return AlertDialog(
-              content: Text('Something went wrong, please restart the app'),
+              content:
+                  const Text('Something went wrong, please restart the app'),
               actions: [
                 ElevatedButton(
                     style: ButtonStyle(
@@ -38,7 +44,7 @@ class _WrapperState extends State<Wrapper> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: Text(
+                    child: const Text(
                       'okay',
                       style: TextStyle(color: Colors.black, fontSize: 18),
                     ))
@@ -57,11 +63,9 @@ class _WrapperState extends State<Wrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-      child: AnimatedTextKit(
-        animatedTexts: [TyperAnimatedText('Loading...')],
-        totalRepeatCount: 15,
-      ),
+        body: AnimatedTextKit(
+      animatedTexts: [TyperAnimatedText('Loading...')],
+      totalRepeatCount: 15,
     ));
   }
 }
