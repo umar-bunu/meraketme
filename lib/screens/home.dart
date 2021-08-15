@@ -234,7 +234,7 @@ class _HomeState extends State<Home> {
                     const SizedBox(
                       height: 10,
                     ),
-                    Text('Support Service'),
+                    const Text('Support Service'),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
