@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meraketme/screens/food_view.dart';
+import 'package:meraketme/widgets/food_view.dart';
 import 'package:meraketme/screens/shopping_cart.dart';
 
 import '../widgets/drawerClass.dart';
@@ -116,30 +116,45 @@ class _HomeState extends State<Home> {
                                           children: [
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.end,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
-                                                IconButton(
-                                                    onPressed: () {
-                                                      Navigator.pushReplacement(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (BuildContext
-                                                                      context) =>
-                                                                  const ShoppingCart()));
-                                                    },
-                                                    icon: const Icon(
-                                                      Icons.shopping_cart,
-                                                      size: 30,
-                                                    )),
-                                                IconButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    icon: const Icon(
-                                                      Icons.cancel,
-                                                      color: Colors.black,
-                                                      size: 30,
-                                                    ))
+                                                const Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Icon(
+                                                    Icons.favorite,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    IconButton(
+                                                        onPressed: () {
+                                                          Navigator.pushReplacement(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                  builder: (BuildContext
+                                                                          context) =>
+                                                                      const ShoppingCart()));
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons.shopping_cart,
+                                                          size: 30,
+                                                        )),
+                                                    IconButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons.cancel,
+                                                          color: Colors.black,
+                                                          size: 30,
+                                                        ))
+                                                  ],
+                                                ),
                                               ],
                                             ),
                                             Food_view(

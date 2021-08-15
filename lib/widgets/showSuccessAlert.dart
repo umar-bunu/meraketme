@@ -30,7 +30,7 @@ class _ShowSuccessAlertState extends State<ShowSuccessAlert> {
                   size: 70,
                   color: Colors.purple,
                 ),
-                Text('Added to Cart')
+                Text('Done')
               ],
             ),
           )),
