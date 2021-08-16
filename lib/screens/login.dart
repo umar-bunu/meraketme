@@ -190,7 +190,6 @@ class _LoginState extends State<Login> {
                               String email = '';
                               String errorInput = '';
                               return AlertDialog(
-                                title: const Text('Reset Password'),
                                 content: SizedBox(
                                   height: 100,
                                   child: Column(

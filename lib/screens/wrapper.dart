@@ -22,13 +22,25 @@ class _WrapperState extends State<Wrapper> {
               MaterialPageRoute(builder: (BuildContext context) => Login()))
           : Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (BuildContext context) => Home()));
+
+      await Firebase.initializeApp();
+      FirebaseAuth.instance.currentUser == null
+          ? Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const Login()))
+          : Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const Home()));
     } catch (e) {
       print(e.toString());
       showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              content: Text('Something went wrong, please restart the app'),
+              content:
+                  const Text('Something went wrong, please restart the app'),
               actions: [
                 ElevatedButton(
                     style: ButtonStyle(
@@ -37,7 +49,7 @@ class _WrapperState extends State<Wrapper> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: Text(
+                    child: const Text(
                       'okay',
                       style: TextStyle(color: Colors.black, fontSize: 18),
                     ))

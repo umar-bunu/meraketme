@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'home.dart';
 
@@ -25,10 +24,6 @@ class _RegisterState extends State<Register> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          'MerakEtme',
-          style: GoogleFonts.encodeSans(fontSize: 24),
-        ),
         elevation: 0,
       ),
       body: Container(

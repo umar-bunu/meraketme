@@ -6,9 +6,32 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'screens/wrapper.dart';
 
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'High_importance_channel',
+    'High Importance Notification',
+    'This channel is used for important notifications',
+    importance: Importance.high,
+    playSound: true);
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> _firebaseMessagingBackgroindHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('a background message just showed up: ${message.messageId}');
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroindHandler);
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true, badge: true, sound: true);
 
   //remember that you haven't made any notification settigns for ios
   runApp(MaterialApp(
