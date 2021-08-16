@@ -13,18 +13,26 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
     importance: Importance.high,
     playSound: true);
 
+// initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
+const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+const IOSInitializationSettings initializationSettingsIOS =
+    IOSInitializationSettings();
+const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-Future<void> _firebaseMessagingBackgroindHandler(RemoteMessage message) async {
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print('a background message just showed up: ${message.messageId}');
+  debugPrint('a background message just showed up: ${message.messageId}');
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroindHandler);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
