@@ -1,8 +1,13 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:meraketme/services/NotificationServices.dart';
 
 import 'screens/wrapper.dart';
 
@@ -29,9 +34,36 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('a background message just showed up: ${message.messageId}');
 }
 
+Future _setUpIsolate() async {
+  Timer.periodic(const Duration(seconds: 60), (_) async {
+    if (FirebaseAuth.instance.currentUser != null) {
+      var _docs = await FirebaseFirestore.instance
+          .collection('orderHistory')
+          .where('customer',
+              isEqualTo: FirebaseAuth.instance.currentUser!.email)
+          .where('isMade', isEqualTo: true)
+          .where('isDelivered', isEqualTo: false)
+          .where('shouldSendAgain', isEqualTo: true)
+          .get();
+      for (var element in _docs.docs) {
+        debugPrint(element.toString());
+        await NotificationService()
+            .notifyItemOnWay(element.data()['vendorName']);
+        await FirebaseFirestore.instance
+            .collection('orderHistory')
+            .doc(element.id)
+            .update({'shouldSendAgain': false});
+      }
+    } else {
+      debugPrint('user not signed in');
+    }
+  });
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  _setUpIsolate();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
@@ -57,7 +89,7 @@ Future<void> main() async {
             fontFamily: GoogleFonts.encodeSans().fontFamily,
             bodyColor: Colors.black,
             displayColor: Colors.black)),
-    home: Wrapper(),
+    home: const Wrapper(),
     debugShowCheckedModeBanner: false,
   ));
 }

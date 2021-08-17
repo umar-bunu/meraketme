@@ -68,17 +68,7 @@ class DrawerClass extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: ListTile(
           title: const Text(
-            '   Favorites',
-            style: TextStyle(fontSize: 18, color: Colors.black),
-          ),
-          onTap: () async {},
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ListTile(
-          title: const Text(
-            '   My Orders',
+            '  Prev Orders',
             style: TextStyle(fontSize: 18, color: Colors.black),
           ),
           onTap: () async {
@@ -102,6 +92,16 @@ class DrawerClass extends StatelessWidget {
                 MaterialPageRoute(
                     builder: (BuildContext context) => const ShoppingCart()));
           },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListTile(
+          title: const Text(
+            '   Favorites',
+            style: TextStyle(fontSize: 18, color: Colors.black),
+          ),
+          onTap: () async {},
         ),
       ),
       Padding(

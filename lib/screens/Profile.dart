@@ -53,6 +53,7 @@ class _ProfileState extends State<Profile> {
           .where('email', isEqualTo: FirebaseAuth.instance.currentUser!.email)
           .get();
       _phoneDocId = _query.docs.first.id;
+
       setState(() {
         _phoneNo = _query.docs.first.data()['phone'];
       });
@@ -307,6 +308,7 @@ class _ProfileState extends State<Profile> {
                                     .collection('users')
                                     .doc(_query.docs.first.id)
                                     .set({
+                                  'isVendor': false,
                                   'email':
                                       FirebaseAuth.instance.currentUser!.email,
                                   'phone': '+' + _phoneNo
@@ -316,6 +318,7 @@ class _ProfileState extends State<Profile> {
                                     .collection('users')
                                     .doc(_phoneDocId)
                                     .set({
+                                  'isVendor': false,
                                   'email':
                                       FirebaseAuth.instance.currentUser!.email,
                                   'phone': '+' + _phoneNo
@@ -434,7 +437,7 @@ class _ProfileState extends State<Profile> {
                               ),
                               hintText: _state.isEmpty ? 'Gombe State' : _state,
                               labelText: 'State/City',
-                              labelStyle: TextStyle(color: Colors.black)),
+                              labelStyle: const TextStyle(color: Colors.black)),
                           onChanged: (String value) {
                             _password = value.trim();
                           },
@@ -487,7 +490,7 @@ class _ProfileState extends State<Profile> {
                                 _isLoading = false;
                                 _isShowingSuccessMessage = true;
                               });
-                              Timer(Duration(seconds: 3), () {
+                              Timer(const Duration(seconds: 3), () {
                                 setState(() {
                                   _isShowingSuccessMessage = false;
                                 });
@@ -501,7 +504,7 @@ class _ProfileState extends State<Profile> {
                           },
                           child: const Text(
                             'Update Address',
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 18),
                           ))
                     ],
                   ),

@@ -32,7 +32,6 @@ class FireStoreServices {
         _mappedResult!.addAll(element.data());
         _docs.add({'id': element.id, 'data': _mappedResult});
       }
-      debugPrint(_docs.toString());
 
       return _docs;
     } on FirebaseException catch (e) {

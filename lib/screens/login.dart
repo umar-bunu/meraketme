@@ -8,7 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  final payload;
+  const Login({Key? key, this.payload}) : super(key: key);
 
   @override
   _LoginState createState() => _LoginState();
@@ -138,7 +139,11 @@ class _LoginState extends State<Login> {
                               context,
                               MaterialPageRoute(
                                   builder: (BuildContext context) =>
-                                      const Home()));
+                                      widget.payload != null
+                                          ? Home(
+                                              payload: widget.payload,
+                                            )
+                                          : const Home()));
                         } on FirebaseAuthException catch (e) {
                           showDialog(
                               context: context,

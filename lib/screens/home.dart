@@ -7,10 +7,10 @@ import 'package:meraketme/screens/shopping_cart.dart';
 
 import '../widgets/drawerClass.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  final payload;
+  const Home({Key? key, this.payload}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -21,7 +21,7 @@ class _HomeState extends State<Home> {
   Future _getFoodList() async {
     try {
       var _docs = await FirebaseFirestore.instance.collection('foods').get();
-
+      debugPrint(_docs.docs.first.data().toString());
       _foodList = _docs.docs
           .map((element) => {'data': element.data(), 'id': element.id})
           .toList();
@@ -123,7 +123,7 @@ class _HomeState extends State<Home> {
                                                   padding: EdgeInsets.all(8.0),
                                                   child: Icon(
                                                     Icons.favorite,
-                                                    color: Colors.black,
+                                                    color: Colors.purple,
                                                   ),
                                                 ),
                                                 Row(
@@ -140,7 +140,9 @@ class _HomeState extends State<Home> {
                                                                       const ShoppingCart()));
                                                         },
                                                         icon: const Icon(
-                                                          Icons.shopping_cart,
+                                                          Icons
+                                                              .shopping_cart_outlined,
+                                                          color: Colors.purple,
                                                           size: 30,
                                                         )),
                                                     IconButton(
@@ -149,8 +151,8 @@ class _HomeState extends State<Home> {
                                                               context);
                                                         },
                                                         icon: const Icon(
-                                                          Icons.cancel,
-                                                          color: Colors.black,
+                                                          Icons.cancel_outlined,
+                                                          color: Colors.purple,
                                                           size: 30,
                                                         ))
                                                   ],

@@ -47,55 +47,63 @@ class _OrderHistoryState extends State<OrderHistory> {
                       height: 15,
                     ),
                     ...(_snapData.map((element) => Card(
-                            child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Image.network(
-                                  element['data']['picture'],
-                                  height: 70,
-                                  width: 70,
-                                  fit: BoxFit.contain,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      element['name'],
-                                      style: const TextStyle(fontSize: 18),
+                            child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Image.network(
+                                    element['data']['picture'],
+                                    height: 100,
+                                    width: 100,
+                                    fit: BoxFit.contain,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        element['data']['name'],
+                                        style: const TextStyle(fontSize: 18),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                          'By ' + element['data']['restaurant'])
+                                    ],
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                      'N' +
+                                          (double.parse(element['data']
+                                                      ['price']) *
+                                                  double.parse(element['data']
+                                                      ['quantity']))
+                                              .toString(),
+                                      style: const TextStyle(fontSize: 18.5),
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    Text('By ' + element['restaurant'])
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Text(
-                                    'N' +
-                                        (double.parse(element['price']) *
-                                                element['quantity'])
-                                            .toString(),
-                                    style: const TextStyle(fontSize: 18.5),
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
-                            ),
-                            Align(
-                                alignment: Alignment.bottomLeft,
-                                heightFactor: 2,
-                                child: Text(
-                                  element['messageToSeller'],
-                                  overflow: TextOverflow.ellipsis,
-                                ))
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ))))
                   ],
                 );
               }
             }
             if (snapshot.hasError) {
-              return Text(snapshot.error.toString());
+              return Center(
+                child: Text(
+                  'Error occured\n' + snapshot.error.toString(),
+                  style: const TextStyle(fontSize: 17),
+                  textAlign: TextAlign.center,
+                ),
+              );
             } else {
               return const Center(
                 child: CircularProgressIndicator(

@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:meraketme/widgets/showSuccessAlert.dart';
 
@@ -22,6 +23,7 @@ class _Food_viewState extends State<Food_view> {
   bool _isloading = false;
   String _messageToSeller = '';
 
+  List _toppings = [];
   bool _isShowingSuccessAlert = false;
 
   Future _addedToCart() async {
@@ -34,6 +36,16 @@ class _Food_viewState extends State<Food_view> {
           _isShowingSuccessAlert = false;
         });
       }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _toppings = widget.selectedFood['data']['toppings'].keys
+          .map((key) => {'key': key, 'isSelected': false})
+          .toList();
     });
   }
 
@@ -62,37 +74,105 @@ class _Food_viewState extends State<Food_view> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Pieces',
+                          const Padding(
+                            padding: EdgeInsets.only(right: 8.0),
+                            child: Text(
+                              'Pieces',
+                            ),
                           ),
-                          Container(
-                              padding: const EdgeInsets.only(left: 10),
-                              child: Text(
-                                _noOfItems.toString(),
-                                textAlign: TextAlign.center,
+                          GestureDetector(
+                            onTap: () {
+                              if (_noOfItems > 1) {
+                                setState(() {
+                                  _noOfItems -= 1;
+                                });
+                              }
+                            },
+                            child: const Icon(
+                              Icons.arrow_back_ios_new,
+                              size: 17,
+                            ),
+                          ),
+                          Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: SizedBox(
+                                width: 30,
+                                child: Text(
+                                  _noOfItems.toString(),
+                                  textAlign: TextAlign.center,
+                                ),
                               )),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _noOfItems = _noOfItems + 1;
+                              });
+                            },
+                            child: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 17,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15,
+                        child: Divider(
+                          color: Colors.grey[850],
+                        ),
+                      ),
+                      SizedBox(
+                        width: _width,
+                        height: 50,
+                        child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            shrinkWrap: true,
+                            itemCount: _toppings.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                decoration: BoxDecoration(
+                                    color: _toppings[index]['isSelected']
+                                        ? Colors.green.withOpacity(0.1)
+                                        : Colors.red.withOpacity(0.1),
+                                    border: const Border(
+                                        bottom: BorderSide(
+                                            color: Colors.black, width: 0.5))),
+                                child: GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      _noOfItems = _noOfItems + 1;
+                                      _toppings[index] = {
+                                        'key': _toppings[index]['key'],
+                                        'isSelected': !_toppings[index]
+                                            ['isSelected']
+                                      };
                                     });
                                   },
-                                  child: const Icon(Icons.arrow_drop_up)),
-                              GestureDetector(
-                                  onTap: () {
-                                    if (_noOfItems > 1) {
-                                      setState(() {
-                                        _noOfItems -= 1;
-                                      });
-                                    }
-                                  },
-                                  child: const Icon(Icons.arrow_drop_down))
-                            ],
-                          )
-                        ],
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                          width: 80,
+                                          child: Text(
+                                            _toppings[index]['key'],
+                                            style:
+                                                const TextStyle(fontSize: 16),
+                                            overflow: TextOverflow.ellipsis,
+                                          )),
+                                      const SizedBox(
+                                        width: 5,
+                                      ),
+                                      Icon(_toppings[index]['isSelected']
+                                          ? Icons.cancel_outlined
+                                          : Icons.add)
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }),
                       ),
                       const SizedBox(
                         height: 15,
@@ -137,6 +217,7 @@ class _Food_viewState extends State<Food_view> {
                               if (currentItems == null) {
                                 currentItems = [
                                   {
+                                    'id': widget.selectedFood['id'],
                                     'picture': widget.selectedFood['data']
                                         ['picture'],
                                     'name': widget.selectedFood['data']['name'],
@@ -147,13 +228,18 @@ class _Food_viewState extends State<Food_view> {
                                         ['vendor'],
                                     'messageToSeller': _messageToSeller,
                                     'restaurant': widget.selectedFood['data']
-                                        ['restaurant']
+                                        ['restaurant'],
+                                    'toppings': _toppings
+                                        .where(
+                                            (element) => element['isSelected'])
+                                        .toList()
                                   }
                                 ];
                                 await _storage.setItem(
                                     'cartItems', currentItems);
                               } else {
                                 currentItems.add({
+                                  'id': widget.selectedFood['id'],
                                   'messageToSeller': _messageToSeller,
                                   'picture': widget.selectedFood['data']
                                       ['picture'],
@@ -163,7 +249,10 @@ class _Food_viewState extends State<Food_view> {
                                   'vendor': widget.selectedFood['data']
                                       ['vendor'],
                                   'restaurant': widget.selectedFood['data']
-                                      ['restaurant']
+                                      ['restaurant'],
+                                  'toppings': _toppings
+                                      .where((element) => element['isSelected'])
+                                      .toList()
                                 });
                                 await _storage.setItem(
                                     'cartItems', currentItems);
