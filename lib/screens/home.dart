@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/painting.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
   final payload;
+
   const Home({Key? key, this.payload}) : super(key: key);
 
   @override
@@ -18,16 +20,33 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<Map> _foodList = [];
+  final List<String> _categories = [
+    'Appetizers',
+    'Desserts',
+    'Local',
+    'Beverage',
+    'Pasta',
+    'Sandwiches'
+  ];
+  String _selectedCategory = 'All Categories';
+
   Future _getFoodList() async {
     try {
       var _docs = await FirebaseFirestore.instance.collection('foods').get();
-      debugPrint(_docs.docs.first.data().toString());
+
       _foodList = _docs.docs
           .map((element) => {'data': element.data(), 'id': element.id})
           .toList();
+      for (int i = 0; i < _foodList.length; i++) {
+        _docs = await FirebaseFirestore.instance
+            .collection('user')
+            .where('user', isEqualTo: _foodList[i]['data']['vendor'])
+            .get();
+      }
       setState(() {
-        for (int i = 0; i < 14; i++) {
+        for (int i = 0; i < 6; i++) {
           _foodList.add(_foodList.first);
+          _foodList.add(_foodList[1]);
         }
       });
     } on FirebaseException catch (e) {
@@ -59,218 +78,357 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: AppBar(),
-      body: Container(
-        color: Colors.grey[200],
-        height: _height,
-        child: SafeArea(
-          child: ListView(
-            physics: const NeverScrollableScrollPhysics(),
+      body: SafeArea(
+        child: Container(
+          color: Colors.grey[200],
+          height: _height,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const SizedBox(
                 height: 15,
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                child: TextField(
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.search),
-                      enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.purple)),
-                      focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.purple)),
-                      border: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.purple)),
-                      hintText: 'Cheese burger',
-                      labelText: 'Search for your favorite food?',
-                      labelStyle: TextStyle(color: Colors.black)),
-                ),
-              ),
+              Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Column(
+                    children: [
+                      const TextField(
+                        decoration: InputDecoration(
+                            icon: Icon(Icons.search),
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.purple)),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.purple)),
+                            border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.purple)),
+                            hintText: 'Cheese burger',
+                            labelText: 'Search for your favorite food?',
+                            labelStyle: TextStyle(color: Colors.black)),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Row(
+                        children: [
+                          const Text('Categories: '),
+                          DropdownButton(
+                            iconEnabledColor: Colors.purple,
+                            value: _selectedCategory,
+                            hint: const Text('Desserts'),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedCategory = value.toString();
+                              });
+                            },
+                            items: [
+                              const DropdownMenuItem(
+                                  value: 'All Categories',
+                                  child: Text('All Categories')),
+                              ...(_categories
+                                  .map((e) => DropdownMenuItem(
+                                      value: e, child: Text(e)))
+                                  .toList())
+                            ],
+                          )
+                        ],
+                      )
+                    ],
+                  )),
               const SizedBox(
                 height: 15,
               ),
-              SizedBox(
-                height: _height * 0.65,
-                width: _width,
+              Flexible(
                 child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white54,
-                      borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.all(4.0),
-                  child: Scrollbar(
-                    thickness: 5,
-                    child: GridView.builder(
-                        itemCount: _foodList.length,
-                        shrinkWrap: true,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 5),
-                        itemBuilder: (BuildContext context, int index) {
-                          return GestureDetector(
-                              onTap: () {
-                                showModalBottomSheet(
-                                    isScrollControlled: true,
-                                    context: context,
-                                    builder: (BuildContext context) => Wrap(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                const Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  child: Icon(
-                                                    Icons.favorite,
-                                                    color: Colors.purple,
-                                                  ),
-                                                ),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  children: [
-                                                    IconButton(
-                                                        onPressed: () {
-                                                          Navigator.pushReplacement(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                  builder: (BuildContext
-                                                                          context) =>
-                                                                      const ShoppingCart()));
-                                                        },
-                                                        icon: const Icon(
-                                                          Icons
-                                                              .shopping_cart_outlined,
-                                                          color: Colors.purple,
-                                                          size: 30,
-                                                        )),
-                                                    IconButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        icon: const Icon(
-                                                          Icons.cancel_outlined,
-                                                          color: Colors.purple,
-                                                          size: 30,
-                                                        ))
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                            Food_view(
-                                                selectedFood: _foodList[index])
-                                          ],
-                                        ));
-                              },
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Stack(
-                                  children: [
-                                    Container(
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                      child: Image.network(
-                                        _foodList[index]['data']['picture'],
-                                      ),
-                                    ),
-                                    Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: Container(
-                                            height: 40,
-                                            width: double.infinity,
-                                            alignment: Alignment.center,
-                                            margin: const EdgeInsets.all(10),
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
+                    decoration: BoxDecoration(
+                        color: Colors.white54,
+                        borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.all(4.0),
+                    child: _foodList.isNotEmpty
+                        ? _foodList
+                                    .where((element) =>
+                                        element['data']['category'] ==
+                                        _selectedCategory)
+                                    .toList()
+                                    .isEmpty &&
+                                _selectedCategory != 'All Categories'
+                            ? const Center(
+                                child: Text(
+                                  'No items to display for this category',
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              )
+                            : Scrollbar(
+                                thickness: 5,
+                                child: GridView.builder(
+                                    itemCount: _selectedCategory !=
+                                            "All Categories"
+                                        ? _foodList
+                                            .where((element) =>
+                                                element['data']['category'] ==
+                                                _selectedCategory)
+                                            .toList()
+                                            .length
+                                        : _foodList.length,
+                                    shrinkWrap: true,
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 2,
+                                            crossAxisSpacing: 10,
+                                            mainAxisSpacing: 5),
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return GestureDetector(
+                                          onTap: () {
+                                            showModalBottomSheet(
+                                                isScrollControlled: true,
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        Wrap(
+                                                          children: [
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                const Padding(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .all(
+                                                                              8.0),
+                                                                  child: Icon(
+                                                                    Icons
+                                                                        .favorite,
+                                                                    color: Colors
+                                                                        .purple,
+                                                                  ),
+                                                                ),
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .end,
+                                                                  children: [
+                                                                    IconButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pushReplacement(
+                                                                              context,
+                                                                              MaterialPageRoute(builder: (BuildContext context) => const ShoppingCart()));
+                                                                        },
+                                                                        icon:
+                                                                            const Icon(
+                                                                          Icons
+                                                                              .shopping_cart_outlined,
+                                                                          color:
+                                                                              Colors.purple,
+                                                                          size:
+                                                                              30,
+                                                                        )),
+                                                                    IconButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        },
+                                                                        icon:
+                                                                            const Icon(
+                                                                          Icons
+                                                                              .cancel_outlined,
+                                                                          color:
+                                                                              Colors.purple,
+                                                                          size:
+                                                                              30,
+                                                                        ))
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Food_view(
+                                                                selectedFood: _selectedCategory !=
+                                                                        "All Categories"
+                                                                    ? _foodList
+                                                                        .where((element) =>
+                                                                            element['data']['category'] ==
+                                                                            _selectedCategory)
+                                                                        .toList()[index]
+                                                                    : _foodList[index])
+                                                          ],
+                                                        ));
+                                          },
+                                          child: Card(
+                                            shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(5)),
-                                            child: Column(
+                                                    BorderRadius.circular(10)),
+                                            child: Stack(
                                               children: [
-                                                Text(
-                                                  _foodList[index]['data']
-                                                      ['name'],
-                                                  style: const TextStyle(
-                                                      fontSize: 18),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
+                                                CachedNetworkImage(
+                                                  imageUrl: _selectedCategory !=
+                                                          "All Categories"
+                                                      ? _foodList
+                                                              .where((element) =>
+                                                                  element['data']
+                                                                      [
+                                                                      'category'] ==
+                                                                  _selectedCategory)
+                                                              .toList()[index]
+                                                          ['data']['picture']
+                                                      : _foodList[index]['data']
+                                                          ['picture'],
+                                                  imageBuilder: (context,
+                                                          imageProvider) =>
+                                                      Container(
+                                                    decoration: BoxDecoration(
+                                                      image: DecorationImage(
+                                                        onError:
+                                                            (error, stack) {
+                                                          debugPrint(
+                                                              error.toString());
+                                                        },
+                                                        image: imageProvider,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  placeholder: (context, url) {
+                                                    return const Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    );
+                                                  },
+                                                  errorWidget: (context, url,
+                                                          error) =>
+                                                      const Icon(Icons.error),
                                                 ),
-                                                Text(
-                                                  'By ' +
-                                                      _foodList[index]['data']
-                                                          ['restaurant'],
+                                                Align(
+                                                    alignment:
+                                                        Alignment.bottomCenter,
+                                                    child: Container(
+                                                        height: 40,
+                                                        width: double.infinity,
+                                                        alignment:
+                                                            Alignment.center,
+                                                        margin: const EdgeInsets
+                                                            .all(10),
+                                                        decoration: BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        5)),
+                                                        child: Column(
+                                                          children: [
+                                                            Text(
+                                                              (_selectedCategory !=
+                                                                      "All Categories")
+                                                                  ? _foodList
+                                                                          .where((element) =>
+                                                                              element['data']['category'] ==
+                                                                              _selectedCategory)
+                                                                          .toList()[index]['data']
+                                                                      ['name']
+                                                                  : _foodList[index]
+                                                                          [
+                                                                          'data']
+                                                                      ['name'],
+                                                              style:
+                                                                  const TextStyle(
+                                                                      fontSize:
+                                                                          18),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                            _selectedCategory !=
+                                                                    "All Categories"
+                                                                ? Text('By ' +
+                                                                    _foodList
+                                                                        .where((element) =>
+                                                                            element['data']['category'] ==
+                                                                            _selectedCategory)
+                                                                        .toList()[index]['data']['restaurant'])
+                                                                : Text(
+                                                                    'By ' +
+                                                                        _foodList[index]['data']
+                                                                            [
+                                                                            'restaurant'],
+                                                                  )
+                                                          ],
+                                                        ))),
+                                                Align(
+                                                  alignment: Alignment.topRight,
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(5),
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                      color: Colors.white,
+                                                    ),
+                                                    child: _selectedCategory !=
+                                                            "All Categories"
+                                                        ? Text('N' + _foodList.where((element) => element['data']['category'] == _selectedCategory).toList()[index]['data']['price'],
+                                                            style: const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic,
+                                                                fontSize: 16))
+                                                        : Text(
+                                                            'N' +
+                                                                _foodList[index]
+                                                                        ['data']
+                                                                    ['price'],
+                                                            style: const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontStyle:
+                                                                    FontStyle.italic,
+                                                                fontSize: 16)),
+                                                  ),
                                                 )
                                               ],
-                                            ))),
-                                    Align(
-                                      alignment: Alignment.topRight,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(5),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                        ),
-                                        child: Text(
-                                            'N' +
-                                                _foodList[index]['data']
-                                                    ['price'],
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontStyle: FontStyle.italic,
-                                                fontSize: 16)),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ));
-                        }),
-                  ),
-                ),
+                                            ),
+                                          ));
+                                    }),
+                              )
+                        : const Center(child: CircularProgressIndicator())),
               ),
-              Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text('Support Service'),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        GestureDetector(
-                          child: Image.asset(
-                            'assets/images/facebook.png',
-                            height: 30,
-                            width: 30,
+              SizedBox(
+                height: 80,
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Text('Support Service'),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          GestureDetector(
+                            child: Image.asset(
+                              'assets/images/facebook.png',
+                              height: 20,
+                              width: 20,
+                            ),
                           ),
-                        ),
-                        GestureDetector(
-                          child: Image.asset(
-                            'assets/images/whatsapp.png',
-                            height: 40,
-                            width: 40,
+                          GestureDetector(
+                            child: Image.asset(
+                              'assets/images/whatsapp.png',
+                              height: 25,
+                              width: 25,
+                            ),
                           ),
-                        ),
-                        GestureDetector(
-                          child: Image.asset(
-                            'assets/images/instagram.png',
-                            height: 30,
-                            width: 30,
-                          ),
-                        ),
-                        GestureDetector(
-                          child: Image.asset(
-                            'assets/images/instagram.png',
-                            height: 30,
-                            width: 30,
-                          ),
-                        )
-                      ],
-                    )
-                  ])
+                          GestureDetector(
+                            child: Image.asset(
+                              'assets/images/instagram.png',
+                              height: 20,
+                              width: 20,
+                            ),
+                          )
+                        ],
+                      )
+                    ]),
+              )
             ],
           ),
         ),
