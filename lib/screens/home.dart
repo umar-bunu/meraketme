@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:meraketme/widgets/food_view.dart';
 import 'package:meraketme/screens/shopping_cart.dart';
 
@@ -20,6 +24,46 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<Map> _foodList = [];
+  bool _hasWidgetBuilt = false;
+  final List _states = [
+    'Abia',
+    'Adamawa',
+    'Akwa Ibom',
+    'Anambra',
+    'Bauchi',
+    'Bayelsa',
+    'Benue',
+    'Borno',
+    'CrosRiver',
+    'Delta',
+    'Ebonyi',
+    'Edo',
+    'Ekit',
+    'Enugu',
+    'Gombe',
+    'Imo',
+    'Jigawa',
+    'Kaduna',
+    'Kano',
+    'Katsina',
+    'Kebbi',
+    'Kogi',
+    'Kwara',
+    'Lagos',
+    'Nasarawa',
+    'Niger',
+    'Ogun',
+    'Osun',
+    'Ondo',
+    'Osun',
+    'Oyo',
+    'Plateau',
+    'Rivers',
+    'Sokoto',
+    'Taraba',
+    'Yobe',
+    'Zamfara'
+  ];
   final List<String> _categories = [
     'Appetizers',
     'Desserts',
@@ -28,21 +72,88 @@ class _HomeState extends State<Home> {
     'Pasta',
     'Sandwiches'
   ];
+
   String _selectedCategory = 'All Categories';
+  String _selectedState = 'Lagos';
 
   Future _getFoodList() async {
+    Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (_hasWidgetBuilt) {
+        bool isLocationServiceEnabled =
+            await Geolocator.isLocationServiceEnabled();
+        if (isLocationServiceEnabled == false) {
+          LocationPermission permission = await Geolocator.checkPermission();
+          if (permission == LocationPermission.denied) {
+            LocationPermission _permission2 =
+                await Geolocator.requestPermission();
+            if (_permission2 == LocationPermission.denied ||
+                _permission2 == LocationPermission.deniedForever) {
+              await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            }
+          }
+          if (permission == LocationPermission.deniedForever) {
+            await showDialog(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                      title: const Text('Oh oh!'),
+                      content:
+                          const Text('You need to allow location permissions'),
+                      actions: [
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Quit'))
+                      ],
+                    ));
+            await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+          }
+        }
+
+        timer.cancel();
+      }
+    });
     try {
-      var _docs = await FirebaseFirestore.instance.collection('foods').get();
+      var _position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      var _docs = await FirebaseFirestore.instance
+          .collection('users')
+          .where('isVendor', isEqualTo: true)
+          .where('location', isEqualTo: _selectedState)
+          .get();
+      var _vendorList = _docs.docs.map((e) => {'data': e.data()}).toList();
+      for (int i = 0; i < _vendorList.length; i++) {
+        var distance = Geolocator.distanceBetween(
+                _position.latitude,
+                _position.longitude,
+                double.parse(
+                    _vendorList[i]['data']!['latlng']['latitude'].toString()),
+                double.parse(_vendorList[i]['data']!['latlng']['longitude']
+                    .toString())) /
+            1000;
+        if (distance <=
+            double.parse(_vendorList[i]['data']!['highestdistance'])) {
+          _vendorList[i]['data']!['shouldShow'] = true;
+        } else {
+          _vendorList[i]['data']!['shouldShow'] = false;
+        }
+      }
+      _docs = await FirebaseFirestore.instance
+          .collection('foods')
+          .where('vendor',
+              whereIn: _vendorList
+                  .where((element) => element['data']!['shouldShow'] == true)
+                  .toList()
+                  .map((e) => e['data']!['vendor'])
+                  .toList())
+          .get();
 
       _foodList = _docs.docs
           .map((element) => {'data': element.data(), 'id': element.id})
           .toList();
-      for (int i = 0; i < _foodList.length; i++) {
-        _docs = await FirebaseFirestore.instance
-            .collection('user')
-            .where('user', isEqualTo: _foodList[i]['data']['vendor'])
-            .get();
-      }
+
+      for (int i = 0; i < _foodList.length; i++) {}
       setState(() {
         for (int i = 0; i < 6; i++) {
           _foodList.add(_foodList.first);
@@ -75,7 +186,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final _height = MediaQuery.of(context).size.height;
     final _width = MediaQuery.of(context).size.width;
-
+    _hasWidgetBuilt = true;
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
