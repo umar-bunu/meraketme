@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class FireStoreServices {
@@ -37,6 +38,35 @@ class FireStoreServices {
     } on FirebaseException catch (e) {
       debugPrint(e.toString());
       return Future.error(e.code);
+    }
+  }
+
+  Future placeOrder(var items) async {
+    try {
+      for (var itemData in items) {
+        await FirebaseFirestore.instance.collection('orderHistory').add({
+          'customer': FirebaseAuth.instance.currentUser!.email,
+          'customerName': FirebaseAuth.instance.currentUser!.displayName,
+          'isDelivered': false,
+          'isMade': false,
+          'item': itemData['id'],
+          'messagetoSeller': itemData['messageToSeller'],
+          'quantity': itemData['quantity'],
+          'shouldSendAgain': true,
+          'timeStamp': FieldValue.serverTimestamp(),
+          'vendorName': itemData['restaurant'],
+          'toppings': itemData['toppings']
+              .map(
+                (eachItem) => eachItem == itemData['toppings'].last
+                    ? eachItem['key'].toString()
+                    : eachItem['key'].toString() + ', ',
+              )
+              .toList()
+              .toString()
+        });
+      }
+    } catch (e) {
+      return Future.error(e);
     }
   }
 }

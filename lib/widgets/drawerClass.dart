@@ -68,7 +68,7 @@ class DrawerClass extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: ListTile(
           title: const Text(
-            '  Prev Orders',
+            '   My Orders',
             style: TextStyle(fontSize: 18, color: Colors.black),
           ),
           onTap: () async {

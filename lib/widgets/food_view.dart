@@ -1,8 +1,6 @@
 // ignore_for_file: camel_case_types
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -191,7 +189,7 @@ class _Food_viewState extends State<Food_view> {
                                 borderSide: BorderSide(color: Colors.purple)),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.purple)),
-                            labelText: 'Notes for seller',
+                            labelText: 'Notes for restaurant (optional)',
                             hintText:
                                 'Tell them how you want it. Eg: I want it spicy',
                             labelStyle: TextStyle(color: Colors.black)),
