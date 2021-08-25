@@ -25,13 +25,7 @@ class FireStoreServices {
       List _docs = [];
 
       for (var element in _query.docs) {
-        var _query2 = await FirebaseFirestore.instance
-            .collection('foods')
-            .doc(element.data()['item'])
-            .get();
-        var _mappedResult = _query2.data();
-        _mappedResult!.addAll(element.data());
-        _docs.add({'id': element.id, 'data': _mappedResult});
+        _docs.add({'id': element.id, 'data': element.data()});
       }
 
       return _docs;
@@ -67,6 +61,33 @@ class FireStoreServices {
       }
     } catch (e) {
       return Future.error(e);
+    }
+  }
+
+  Future makeOrderFromHistory(var item) async {
+    try {
+      var itemToAdd = item;
+      itemToAdd['shouldSendAgain'] = true;
+      itemToAdd['timeStamp'] = FieldValue.serverTimestamp();
+      itemToAdd['isMade'] = false;
+      itemToAdd['isDelivered'] = false;
+      await FirebaseFirestore.instance
+          .collection('orderHistory')
+          .add(itemToAdd);
+    } on FirebaseException catch (e) {
+      return Future.error(e.code);
+    }
+  }
+
+  Future getRestaurants() async {
+    try {
+      var _docs =
+          await FirebaseFirestore.instance.collection('restaurants').get();
+      List _restaurants =
+          _docs.docs.map((e) => {'id': e.id, 'data': e.data()}).toList();
+      return _restaurants;
+    } on FirebaseException catch (e) {
+      return Future.error(e.code);
     }
   }
 }

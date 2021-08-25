@@ -35,27 +35,42 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future _setUpIsolate() async {
+  bool _isLisetening = false;
+
   Timer.periodic(const Duration(seconds: 60), (_) async {
-    if (FirebaseAuth.instance.currentUser != null) {
-      var _docs = await FirebaseFirestore.instance
+    if (FirebaseAuth.instance.currentUser != null && !_isLisetening) {
+      // debugPrint('listening');
+      FirebaseFirestore.instance
           .collection('orderHistory')
           .where('customer',
               isEqualTo: FirebaseAuth.instance.currentUser!.email)
-          .where('isMade', isEqualTo: true)
-          .where('isDelivered', isEqualTo: false)
-          .where('shouldSendAgain', isEqualTo: true)
-          .get();
-      for (var element in _docs.docs) {
-        debugPrint(element.toString());
-        await NotificationService()
-            .notifyItemOnWay(element.data()['vendorName']);
-        await FirebaseFirestore.instance
-            .collection('orderHistory')
-            .doc(element.id)
-            .update({'shouldSendAgain': false});
-      }
+          .snapshots()
+          .listen((event) async {
+        _isLisetening = true;
+        //   debugPrint(
+        //     'elements that changed ' + event.docChanges.length.toString());
+        for (var element in event.docChanges) {
+          // debugPrint(element.doc.id.toString() +
+          //     ' should send again ' +
+          //     element.doc.data()!['shouldSendAgain'].toString() +
+          //     ' ismade ' +
+          //     element.doc.data()!['isMade'].toString());
+
+          if (element.doc.data()!['isMade'] &&
+              element.doc.data()!['shouldSendAgain']) {
+            //   debugPrint('will be updted: ' + element.doc.id);
+            await NotificationService()
+                .notifyItemOnWay(element.doc.data()!['vendorName']);
+            await FirebaseFirestore.instance
+                .collection('orderHistory')
+                .doc(element.doc.id)
+                .update({'shouldSendAgain': false});
+          }
+        }
+      });
     } else {
       debugPrint('user not signed in');
+      _isLisetening = false;
     }
   });
 }
@@ -63,7 +78,7 @@ Future _setUpIsolate() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  _setUpIsolate();
+  //_setUpIsolate();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<

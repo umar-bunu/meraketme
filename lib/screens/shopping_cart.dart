@@ -41,7 +41,7 @@ class _ShoppingCartState extends State<ShoppingCart>
         appBar: AppBar(
           centerTitle: true,
           title: const Text(
-            'Order Cart',
+            'My Basket',
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -51,9 +51,17 @@ class _ShoppingCartState extends State<ShoppingCart>
                 future: _storage.ready,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    List _cartContents = _storage.getItem('cartItems');
+                    var _cartContents = _storage.getItem('cartItems');
                     debugPrint(_cartContents.toString());
-                    if (_cartContents.isEmpty) {
+                    if (_cartContents == null) {
+                      return const Center(
+                        child: Text(
+                          'You have no item in your cart.\n Have you made any order yet?',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 17),
+                        ),
+                      );
+                    } else if (_cartContents.isEmpty || _cartContents == null) {
                       return const Center(
                         child: Text(
                           'You have no item in your cart.\n Have you made any order yet?',

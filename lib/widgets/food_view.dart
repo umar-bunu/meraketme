@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:localstorage/localstorage.dart';
@@ -37,14 +38,12 @@ class _Food_viewState extends State<Food_view> {
     });
   }
 
+  Future _getToppings() async {}
+
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _toppings = widget.selectedFood['data']['toppings'].keys
-          .map((key) => {'key': key, 'isSelected': false})
-          .toList();
-    });
+    _getToppings();
   }
 
   @override
@@ -60,10 +59,27 @@ class _Food_viewState extends State<Food_view> {
             ListView(
               shrinkWrap: true,
               children: [
-                Image.network(
-                  widget.selectedFood['data']['picture'],
-                  height: _width,
-                  width: _width,
+                CachedNetworkImage(
+                  imageUrl: widget.selectedFood['data']['picture'],
+                  imageBuilder: (context, imageProvider) => Container(
+                    width: _width,
+                    height: _width,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        onError: (error, stack) {
+                          debugPrint(error.toString());
+                        },
+                        image: imageProvider,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  placeholder: (context, url) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),

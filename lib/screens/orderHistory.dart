@@ -2,9 +2,12 @@
 
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:meraketme/screens/shopping_cart.dart';
 import 'package:meraketme/services/FireStoreServices.dart';
+import 'package:meraketme/widgets/expandedFoodToOrder.dart';
 
 class OrderHistory extends StatefulWidget {
   const OrderHistory({Key? key}) : super(key: key);
@@ -16,6 +19,8 @@ class OrderHistory extends StatefulWidget {
 class _OrderHistoryState extends State<OrderHistory> {
   @override
   Widget build(BuildContext context) {
+    double _height = MediaQuery.of(context).size.height;
+    double _width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -46,52 +51,110 @@ class _OrderHistoryState extends State<OrderHistory> {
                     const SizedBox(
                       height: 15,
                     ),
-                    ...(_snapData.map((element) => Card(
-                            child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Image.network(
-                                    element['data']['picture'],
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.contain,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        element['data']['name'],
-                                        style: const TextStyle(fontSize: 18),
-                                        overflow: TextOverflow.ellipsis,
+                    ...(_snapData.map((element) => GestureDetector(
+                          onTap: () {
+                            showModalBottomSheet(
+                                isScrollControlled: true,
+                                context: context,
+                                builder: (BuildContext context) => Wrap(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Icon(
+                                                Icons.favorite,
+                                                color: Colors.purple,
+                                              ),
+                                            ),
+                                            IconButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                icon: const Icon(
+                                                  Icons.cancel_outlined,
+                                                  color: Colors.purple,
+                                                  size: 30,
+                                                )),
+                                          ],
+                                        ),
+                                        ExpanedFoodToOrder(
+                                          foodItem: element,
+                                          screenHeight: _height,
+                                          screenwidth: _width,
+                                        )
+                                      ],
+                                    ));
+                          },
+                          child: Card(
+                              child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                CachedNetworkImage(
+                                  imageUrl: element['data']['picture'],
+                                  imageBuilder: (context, imageProvider) =>
+                                      Container(
+                                    height: _width * 0.25,
+                                    width: _width * 0.25,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        onError: (error, stack) {
+                                          debugPrint(error.toString());
+                                        },
+                                        image: imageProvider,
+                                        fit: BoxFit.contain,
                                       ),
-                                      Text(
-                                          'By ' + element['data']['restaurant'])
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Text(
-                                      'N' +
-                                          (double.parse(element['data']
-                                                      ['price']) *
-                                                  double.parse(element['data']
-                                                      ['quantity']))
-                                              .toString(),
-                                      style: const TextStyle(fontSize: 18.5),
-                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ))))
+                                  placeholder: (context, url) {
+                                    debugPrint(url);
+                                    return const CircularProgressIndicator();
+                                  },
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                ),
+                                Flexible(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          element['data']['item'],
+                                          style: const TextStyle(fontSize: 18),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text('By ' +
+                                            element['data']['vendorName'])
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  width: _width * 0.25,
+                                  child: Text(
+                                    'N' +
+                                        (double.parse(
+                                                    element['data']['price']) *
+                                                double.parse(element['data']
+                                                    ['quantity']))
+                                            .toString(),
+                                    style: const TextStyle(fontSize: 18.5),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                        )))
                   ],
                 );
               }
