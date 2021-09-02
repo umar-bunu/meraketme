@@ -102,35 +102,18 @@ class _RestaurantViewState extends State<RestaurantView> {
                                               children: [
                                                 Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
+                                                      MainAxisAlignment.end,
                                                   children: [
-                                                    const Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Icon(
-                                                        Icons.favorite,
-                                                        color: Colors.purple,
-                                                      ),
-                                                    ),
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment.end,
-                                                      children: [
-                                                        IconButton(
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
-                                                            icon: const Icon(
-                                                              Icons
-                                                                  .cancel_outlined,
-                                                              color:
-                                                                  Colors.purple,
-                                                              size: 30,
-                                                            ))
-                                                      ],
-                                                    ),
+                                                    IconButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons.cancel_outlined,
+                                                          color: Colors.purple,
+                                                          size: 30,
+                                                        ))
                                                   ],
                                                 ),
                                                 Food_view(
@@ -202,35 +185,18 @@ class _RestaurantViewState extends State<RestaurantView> {
                                               children: [
                                                 Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
+                                                      MainAxisAlignment.end,
                                                   children: [
-                                                    const Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Icon(
-                                                        Icons.favorite,
-                                                        color: Colors.purple,
-                                                      ),
-                                                    ),
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment.end,
-                                                      children: [
-                                                        IconButton(
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
-                                                            icon: const Icon(
-                                                              Icons
-                                                                  .cancel_outlined,
-                                                              color:
-                                                                  Colors.purple,
-                                                              size: 30,
-                                                            ))
-                                                      ],
-                                                    ),
+                                                    IconButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons.cancel_outlined,
+                                                          color: Colors.purple,
+                                                          size: 30,
+                                                        ))
                                                   ],
                                                 ),
                                                 Food_view(selectedFood: e)

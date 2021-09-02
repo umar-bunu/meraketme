@@ -11,8 +11,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 class Wrapper extends StatefulWidget {
   const Wrapper({Key? key}) : super(key: key);
 
@@ -21,84 +19,9 @@ class Wrapper extends StatefulWidget {
 }
 
 class _WrapperState extends State<Wrapper> {
-  Future selectNotification(String? payload) async {
-    if (payload != null) {
-      debugPrint('notification payload: $payload');
-    }
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => FirebaseAuth.instance.currentUser == null
-              ? Login(
-                  payload: payload,
-                )
-              : Home(
-                  payload: payload,
-                )),
-    );
-  }
-
   void getInitializations() async {
     await Firebase.initializeApp();
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const IOSInitializationSettings initializationSettingsIOS =
-        IOSInitializationSettings();
 
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: selectNotification);
-    debugPrint('about to start receiving messages');
-    FirebaseMessaging.onBackgroundMessage((event) async {
-      debugPrint(event.toString());
-      AndroidNotification? android = event.notification?.android;
-      AppleNotification? ios = event.notification?.apple;
-      RemoteNotification? notification = event.notification;
-
-      if (notification != null && (android != null || ios != null)) {
-        NotificationService()
-            .showNotification(ios: ios != null, android: android != null);
-        flutterLocalNotificationsPlugin.show(
-            int.parse(channel.id),
-            channel.name,
-            channel.description,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                  channel.id, channel.name, channel.description,
-                  playSound: true,
-                  channelShowBadge: true,
-                  priority: Priority.high,
-                  icon: '@mipmap/ic_launcher'),
-            ));
-      }
-    });
-    FirebaseMessaging.onMessage.listen((event) {
-      RemoteNotification? notification = event.notification;
-      debugPrint('this message is to stay for ' + event.ttl.toString());
-      debugPrint(event.toString());
-      AndroidNotification? android = event.notification?.android;
-      AppleNotification? ios = event.notification?.apple;
-      if (notification != null && (android != null || ios != null)) {
-        NotificationService()
-            .showNotification(ios: ios != null, android: android != null);
-        flutterLocalNotificationsPlugin.show(
-            int.parse(channel.id),
-            channel.name,
-            channel.description,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                  channel.id, channel.name, channel.description,
-                  playSound: true,
-                  channelShowBadge: true,
-                  priority: Priority.high,
-                  icon: '@mipmap/ic_launcher'),
-            ));
-      }
-    });
     try {
       FirebaseAuth.instance.currentUser == null
           ? Navigator.pushReplacement(

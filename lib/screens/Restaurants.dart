@@ -59,7 +59,7 @@ class _RestaurantsState extends State<Restaurants> {
                         padding: const EdgeInsets.all(4.0),
                         decoration: BoxDecoration(
                             color: Colors.purple.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(15.0)),
+                            borderRadius: BorderRadius.circular(25.0)),
                         child: TypeAheadField(
                           suggestionsCallback: (pattern) async {
                             if (pattern.isNotEmpty) {

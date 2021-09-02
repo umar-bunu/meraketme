@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/painting.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -144,10 +146,18 @@ class _LoginState extends State<Login> {
                           ElevatedButton(
                               onPressed: () async {
                                 if (!_formKey.currentState!.validate()) return;
+
+                                var _token =
+                                    await FirebaseMessaging.instance.getToken();
+                                FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(_email)
+                                    .update({'token': _token});
                                 try {
                                   await FirebaseAuth.instance
                                       .signInWithEmailAndPassword(
                                           email: _email, password: _password);
+
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(

@@ -255,45 +255,32 @@ class _HomeState extends State<Home> {
                                         children: [
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.end,
                                             children: [
-                                              const Padding(
-                                                padding: EdgeInsets.all(8.0),
-                                                child: Icon(
-                                                  Icons.favorite,
-                                                  color: Colors.purple,
-                                                ),
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  IconButton(
-                                                      onPressed: () {
-                                                        Navigator.pushReplacement(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder: (BuildContext
-                                                                        context) =>
-                                                                    const ShoppingCart()));
-                                                      },
-                                                      icon: const Icon(
-                                                        Icons
-                                                            .shopping_cart_outlined,
-                                                        color: Colors.purple,
-                                                        size: 30,
-                                                      )),
-                                                  IconButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      icon: const Icon(
-                                                        Icons.cancel_outlined,
-                                                        color: Colors.purple,
-                                                        size: 30,
-                                                      ))
-                                                ],
-                                              ),
+                                              IconButton(
+                                                  onPressed: () {
+                                                    Navigator.pushReplacement(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (BuildContext
+                                                                    context) =>
+                                                                const ShoppingCart()));
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons
+                                                        .shopping_cart_outlined,
+                                                    color: Colors.purple,
+                                                    size: 30,
+                                                  )),
+                                              IconButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.cancel_outlined,
+                                                    color: Colors.purple,
+                                                    size: 30,
+                                                  ))
                                             ],
                                           ),
                                           Food_view(selectedFood: suggestion)
@@ -433,42 +420,30 @@ class _HomeState extends State<Home> {
                                                                     Row(
                                                                       mainAxisAlignment:
                                                                           MainAxisAlignment
-                                                                              .spaceBetween,
+                                                                              .end,
                                                                       children: [
-                                                                        const Padding(
-                                                                          padding:
-                                                                              EdgeInsets.all(8.0),
-                                                                          child:
-                                                                              Icon(
-                                                                            Icons.favorite,
-                                                                            color:
-                                                                                Colors.purple,
-                                                                          ),
-                                                                        ),
-                                                                        Row(
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.end,
-                                                                          children: [
-                                                                            IconButton(
-                                                                                onPressed: () {
-                                                                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => const ShoppingCart()));
-                                                                                },
-                                                                                icon: const Icon(
-                                                                                  Icons.shopping_cart_outlined,
-                                                                                  color: Colors.purple,
-                                                                                  size: 30,
-                                                                                )),
-                                                                            IconButton(
-                                                                                onPressed: () {
-                                                                                  Navigator.pop(context);
-                                                                                },
-                                                                                icon: const Icon(
-                                                                                  Icons.cancel_outlined,
-                                                                                  color: Colors.purple,
-                                                                                  size: 30,
-                                                                                ))
-                                                                          ],
-                                                                        ),
+                                                                        IconButton(
+                                                                            onPressed:
+                                                                                () {
+                                                                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => const ShoppingCart()));
+                                                                            },
+                                                                            icon:
+                                                                                const Icon(
+                                                                              Icons.shopping_cart_outlined,
+                                                                              color: Colors.purple,
+                                                                              size: 30,
+                                                                            )),
+                                                                        IconButton(
+                                                                            onPressed:
+                                                                                () {
+                                                                              Navigator.pop(context);
+                                                                            },
+                                                                            icon:
+                                                                                const Icon(
+                                                                              Icons.cancel_outlined,
+                                                                              color: Colors.purple,
+                                                                              size: 30,
+                                                                            ))
                                                                       ],
                                                                     ),
                                                                     Food_view(

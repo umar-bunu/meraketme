@@ -37,7 +37,8 @@ class NotificationService {
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future showNotification({bool? ios, bool? android}) async {
+  Future showNotification(
+      {bool? ios, bool? android, required String message}) async {
     if (Platform.isAndroid && android != null) {
       debugPrint('notification sent');
       AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -72,7 +73,7 @@ class NotificationService {
           AndroidNotificationDetails(
               'channelId' 'Local Notification',
               'Hi' //Required for Android 8.0 or after
-                  'Your order from $vendorName is set and on its way', //Required for Android 8.0 or after
+                  '$vendorName is set and on its way', //Required for Android 8.0 or after
               'Your order will arrive soon', //Required for Android 8.0 or after
               importance: Importance.high,
               playSound: true,

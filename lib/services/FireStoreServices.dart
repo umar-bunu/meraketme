@@ -2,7 +2,10 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+
+import 'package:http/http.dart' as http;
 
 class FireStoreServices {
   Future getShippingDetails(user) async {
@@ -48,7 +51,9 @@ class FireStoreServices {
           'quantity': itemData['quantity'],
           'shouldSendAgain': true,
           'timeStamp': FieldValue.serverTimestamp(),
+          'picture': itemData['picture'],
           'vendorName': itemData['restaurant'],
+          'price': itemData['price'],
           'toppings': itemData['toppings']
               .map(
                 (eachItem) => eachItem == itemData['toppings'].last

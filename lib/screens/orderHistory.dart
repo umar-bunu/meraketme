@@ -142,10 +142,11 @@ class _OrderHistoryState extends State<OrderHistory> {
                                   width: _width * 0.25,
                                   child: Text(
                                     'N' +
-                                        (double.parse(
-                                                    element['data']['price']) *
+                                        (double.parse(element['data']['price']
+                                                    .toString()) *
                                                 double.parse(element['data']
-                                                    ['quantity']))
+                                                        ['quantity']
+                                                    .toString()))
                                             .toString(),
                                     style: const TextStyle(fontSize: 18.5),
                                     overflow: TextOverflow.ellipsis,

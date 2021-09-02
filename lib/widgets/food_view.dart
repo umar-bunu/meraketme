@@ -25,7 +25,7 @@ class _Food_viewState extends State<Food_view> {
   List _toppings = [];
   bool _isShowingSuccessAlert = false;
 
-  Future _addedToCart() async {
+  Future _addedToCart(var context) async {
     setState(() {
       _isShowingSuccessAlert = true;
     });
@@ -35,6 +35,7 @@ class _Food_viewState extends State<Food_view> {
           _isShowingSuccessAlert = false;
         });
       }
+      Navigator.pop(context);
     });
   }
 
@@ -287,10 +288,12 @@ class _Food_viewState extends State<Food_view> {
                                   await _storage.setItem(
                                       'cartItems', currentItems);
                                 }
-                                _addedToCart();
-                                setState(() {
-                                  _isloading = false;
-                                });
+                                await _addedToCart(context);
+                                if (mounted) {
+                                  setState(() {
+                                    _isloading = false;
+                                  });
+                                }
                               } catch (e) {
                                 setState(() {
                                   _isloading = false;
