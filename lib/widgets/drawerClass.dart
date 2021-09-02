@@ -2,6 +2,7 @@
 
 import 'package:flutter/painting.dart';
 import 'package:meraketme/screens/Profile.dart';
+import 'package:meraketme/screens/Restaurants.dart';
 import 'package:meraketme/screens/orderHistory.dart';
 import 'package:meraketme/screens/shopping_cart.dart';
 
@@ -111,7 +112,12 @@ class DrawerClass extends StatelessWidget {
           style: TextStyle(
               fontSize: 18, color: Colors.black, fontWeight: FontWeight.w400),
         ),
-        onTap: () async {},
+        onTap: () {
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const Restaurants()));
+        },
       ),
       ListTile(
         leading: const Icon(

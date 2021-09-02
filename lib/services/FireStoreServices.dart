@@ -85,6 +85,26 @@ class FireStoreServices {
           await FirebaseFirestore.instance.collection('restaurants').get();
       List _restaurants =
           _docs.docs.map((e) => {'id': e.id, 'data': e.data()}).toList();
+      for (int i = 0; i < 6; i++) {
+        _restaurants.add(_restaurants[i]);
+      }
+      return _restaurants;
+    } on FirebaseException catch (e) {
+      return Future.error(e.code);
+    }
+  }
+
+  Future getRestaurantDetails(String restaurant) async {
+    try {
+      var _docs = await FirebaseFirestore.instance
+          .collection('foods')
+          .where('vendor', isEqualTo: restaurant.toString())
+          .get();
+      List _restaurants =
+          _docs.docs.map((e) => {'id': e.id, 'data': e.data()}).toList();
+      for (int i = 0; i < 6; i++) {
+        _restaurants.add(_restaurants[i]);
+      }
       return _restaurants;
     } on FirebaseException catch (e) {
       return Future.error(e.code);
