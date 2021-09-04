@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'home.dart';
@@ -192,6 +194,13 @@ class _RegisterState extends State<Register> {
                         } catch (e) {
                           print('e');
                         }
+                        var _token =
+                            await FirebaseMessaging.instance.getToken();
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(_email)
+                            .update({'token': _token});
+
                         showDialog(
                             context: context,
                             builder: (BuildContext context) {

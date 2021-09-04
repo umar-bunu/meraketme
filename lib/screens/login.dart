@@ -151,7 +151,7 @@ class _LoginState extends State<Login> {
 
                                 var _token =
                                     await FirebaseMessaging.instance.getToken();
-                                FirebaseFirestore.instance
+                                await FirebaseFirestore.instance
                                     .collection('users')
                                     .doc(_email)
                                     .update({'token': _token});

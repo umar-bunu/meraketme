@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:meraketme/services/NotificationServices.dart';
 import 'package:meraketme/services/OtherServices.dart';
 import 'package:meraketme/widgets/food_view.dart';
 import 'package:meraketme/screens/shopping_cart.dart';
@@ -163,7 +162,6 @@ class _HomeState extends State<Home> {
   }
 
   Future _getFoodList() async {
-    NotificationService().notifyItemOnWay('vendorName');
     bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
     if (isLocationServiceEnabled == false) {
       LocationPermission permission = await Geolocator.checkPermission();

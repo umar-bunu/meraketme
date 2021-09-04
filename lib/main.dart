@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,172 +15,136 @@ import 'package:meraketme/services/NotificationServices.dart';
 
 import 'screens/wrapper.dart';
 
-const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'High_importance_channel',
-    'High Importance Notification',
-    'This channel is used for important notifications',
-    importance: Importance.high,
-    playSound: true);
-
-// initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
-const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
-const IOSInitializationSettings initializationSettingsIOS =
-    IOSInitializationSettings();
-const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  debugPrint('a background message just showed up: ${message.data.toString()}');
-  await NotificationService().notifyItemOnWay(message.data.toString());
-}
-
-Future selectNotification(String? payload) async {
-  if (payload != null) {
-    debugPrint('notification payload: $payload');
-  }
-  // await Navigator.push(
-  //   context,
-  //   MaterialPageRoute(
-  //       builder: (context) => FirebaseAuth.instance.currentUser == null
-  //           ? Login(
-  //               payload: payload,
-  //             )
-  //           : Home(
-  //               payload: payload,
-  //             )),
-  // );
-}
-
 Future _setUpIsolate() async {
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  const IOSInitializationSettings initializationSettingsIOS =
-      IOSInitializationSettings();
+  var initialMessage = await FirebaseMessaging.instance.getInitialMessage();
 
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: initializationSettingsIOS,
-  );
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-      onSelectNotification: selectNotification);
-  debugPrint('about to start receiving messages');
-  // final DatabaseReference db = FirebaseDatabase().reference();
-  // db.child("restaurants").push().child('vendor_id').set('-MiCZjGpgOoZZQjKGJS6');
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+    if (message.notification != null) {
+      await NotificationService()
+          .notifyItemOnWay(message.notification!.body.toString());
+    }
+    print('message just popped: ' + message.notification!.body.toString());
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
 
-  // bool _isLisetening = false;
+    if (notification != null && android != null && !kIsWeb) {
+      flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              channel.id,
+              channel.name,
+              channel.description,
+              // TODO add a proper drawable resource to android, for now using
+              //      one that already exists in example app.
+              icon: 'launch_background',
+            ),
+          ));
+    }
+  });
 
-  // Timer.periodic(const Duration(seconds: 60), (_) async {
-  //   if (FirebaseAuth.instance.currentUser != null && !_isLisetening) {
-  //     // debugPrint('listening');
-  //     FirebaseFirestore.instance
-  //         .collection('orderHistory')
-  //         .where('customer',
-  //             isEqualTo: FirebaseAuth.instance.currentUser!.email)
-  //         .snapshots()
-  //         .listen((event) async {
-  //       _isLisetening = true;
-  //       //   debugPrint(
-  //       //     'elements that changed ' + event.docChanges.length.toString());
-  //       for (var element in event.docChanges) {
-  //         // debugPrint(element.doc.id.toString() +
-  //         //     ' should send again ' +
-  //         //     element.doc.data()!['shouldSendAgain'].toString() +
-  //         //     ' ismade ' +
-  //         //     element.doc.data()!['isMade'].toString());
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('A new onMessageOpenedApp event was published!');
+  });
+  // var serverKey = 'AAAAakBflmk:APA91bEfOJfqM1d1OsVlwGrohVHtzxW63MTk-wD2U_z41'
+  //     'jN4E6PnbCALoelqIerWfebo0Co36rAIxXVTCWIsTWHOD3HOMI5ESaEOVMKtZfgxKrCJI1ir'
+  //     'd5kzL1FLPYOZublC-OwjoaRE';
+  // QuerySnapshot ref = await FirebaseFirestore.instance
+  //     .collection('users')
+  //     .where('email', isEqualTo: FirebaseAuth.instance.currentUser!.email)
+  //     .get();
+  // print(ref.docs.first.data().toString());
+  // try {
+  //   ref.docs.forEach((snapshot) async {
+  //     Map snapmap = snapshot.data() as Map;
+  //     http.Response response = await http.post(
+  //       Uri.parse('https://fcm.googleapis.com/fcm/send'),
+  //       headers: <String, String>{
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'key=$serverKey',
+  //       },
+  //       body: jsonEncode(
+  //         <String, dynamic>{
+  //           'notification': <String, dynamic>{
+  //             'body': 'this is a body',
+  //             'title': 'this is a title'
+  //           },
+  //           'priority': 'high',
+  //           'data': <String, dynamic>{
+  //             'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+  //             'id': '1',
+  //             'status': 'done'
+  //           },
+  //           'to': snapmap["token"],
+  //         },
+  //       ),
+  //     );
 
-  //         if (element.doc.data()!['isMade'] &&
-  //             element.doc.data()!['shouldSendAgain']) {
-  //           //   debugPrint('will be updted: ' + element.doc.id);
-  //           await NotificationService()
-  //               .notifyItemOnWay(element.doc.data()!['vendorName']);
-  //           await FirebaseFirestore.instance
-  //               .collection('orderHistory')
-  //               .doc(element.doc.id)
-  //               .update({'shouldSendAgain': false});
-  //         }
-  //       }
-  //     });
-  //   } else {
-  //     debugPrint('user not signed in');
-  //     _isLisetening = false;
-  //   }
-  // });
+  //     print('response: ' + response.body.toString());
+  //   });
+  // } catch (e) {
+  //   print("error push notification");
+  // }
 }
+
+/// Define a top-level named handler which background/terminated messages will
+/// call.
+///
+/// To verify things are working, check out the native platform logs.
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp();
+  print(
+      'Handling a background message ${message.notification!.body.toString()}');
+  if (message.notification != null) {
+    await NotificationService()
+        .notifyItemOnWay(message.notification!.body.toString());
+  }
+}
+
+/// Create a [AndroidNotificationChannel] for heads up notifications
+AndroidNotificationChannel channel = const AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  'This channel is used for important notifications.', // description
+  importance: Importance.high,
+);
+
+/// Initialize the [FlutterLocalNotificationsPlugin] package.
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await _setUpIsolate();
+
+  // Set the background messaging handler early on, as a named top-level function
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  // await flutterLocalNotificationsPlugin
-  //     .resolvePlatformSpecificImplementation<
-  //         AndroidFlutterLocalNotificationsPlugin>()
-  //     ?.createNotificationChannel(channel);
 
+  flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  /// Create an Android Notification Channel.
+  ///
+  /// We use this channel in the `AndroidManifest.xml` file to override the
+  /// default FCM channel to enable heads up notifications.
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  /// Update the iOS foreground notification presentation options to allow
+  /// heads up notifications.
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true, badge: true, sound: true);
-  FirebaseMessaging.onBackgroundMessage((event) async {
-    debugPrint('backgroung message: ' + event.toString());
-    RemoteNotification? notification = event.notification;
+    alert: true,
+    badge: true,
+    sound: true,
+  );
 
-    if (notification != null) {
-      NotificationService().notifyItemOnWay(event.data.toString());
-      flutterLocalNotificationsPlugin.show(
-          int.parse(channel.id),
-          channel.name,
-          channel.description,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-                channel.id, channel.name, channel.description,
-                playSound: true,
-                channelShowBadge: true,
-                priority: Priority.high,
-                icon: '@mipmap/ic_launcher'),
-          ));
-    }
-  });
+  await _setUpIsolate();
 
-  FirebaseMessaging.onMessage.listen((event) async {
-    debugPrint('listening for events');
-
-    RemoteNotification? notification = event.notification;
-    debugPrint('message is' + event.data['whatToSend'].toString());
-    debugPrint('this message is to stay for ' + event.ttl.toString());
-    await NotificationService()
-        .notifyItemOnWay(event.data['whatToSend'].toString());
-    debugPrint(event.toString());
-    AndroidNotification? android = event.notification?.android;
-    AppleNotification? ios = event.notification?.apple;
-    if (notification != null && (android != null || ios != null)) {
-      NotificationService().notifyItemOnWay(event.data.toString());
-      await flutterLocalNotificationsPlugin.show(
-          int.parse(channel.id),
-          channel.name,
-          channel.description,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-                channel.id, channel.name, channel.description,
-                playSound: true,
-                channelShowBadge: true,
-                priority: Priority.high,
-                icon: '@mipmap/ic_launcher'),
-          ));
-    }
-  });
-
-  FirebaseMessaging.instance.onTokenRefresh.listen((event) {
-    FirebaseFirestore.instance
-        .collection(('user'))
-        .doc(FirebaseAuth.instance.currentUser!.email)
-        .update({'token': event});
-  });
-  var token = await FirebaseMessaging.instance.getToken();
-  debugPrint('token: ' + token.toString());
   //remember that you haven't made any notification settigns for ios
   runApp(MaterialApp(
     theme: ThemeData(

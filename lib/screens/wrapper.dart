@@ -21,7 +21,8 @@ class Wrapper extends StatefulWidget {
 class _WrapperState extends State<Wrapper> {
   void getInitializations() async {
     await Firebase.initializeApp();
-
+    var token = await FirebaseMessaging.instance.getToken();
+    print('device token' + token.toString());
     try {
       FirebaseAuth.instance.currentUser == null
           ? Navigator.pushReplacement(
