@@ -66,63 +66,6 @@ Future _setUpIsolate() async {
   await flutterLocalNotificationsPlugin.initialize(initializationSettings,
       onSelectNotification: selectNotification);
   debugPrint('about to start receiving messages');
-  FirebaseMessaging.onBackgroundMessage((event) async {
-    debugPrint(event.toString());
-    AndroidNotification? android = event.notification?.android;
-    AppleNotification? ios = event.notification?.apple;
-    RemoteNotification? notification = event.notification;
-
-    if (notification != null && (android != null || ios != null)) {
-      NotificationService().notifyItemOnWay(event.data.toString());
-      flutterLocalNotificationsPlugin.show(
-          int.parse(channel.id),
-          channel.name,
-          channel.description,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-                channel.id, channel.name, channel.description,
-                playSound: true,
-                channelShowBadge: true,
-                priority: Priority.high,
-                icon: '@mipmap/ic_launcher'),
-          ));
-    }
-  });
-  FirebaseMessaging.onMessage.listen((event) async {
-    debugPrint('listening for events');
-
-    RemoteNotification? notification = event.notification;
-    debugPrint('message is' + event.data['whatToSend'].toString());
-    debugPrint('this message is to stay for ' + event.ttl.toString());
-    await NotificationService()
-        .notifyItemOnWay(event.data['whatToSend'].toString());
-    debugPrint(event.toString());
-    AndroidNotification? android = event.notification?.android;
-    AppleNotification? ios = event.notification?.apple;
-    if (notification != null && (android != null || ios != null)) {
-      debugPrint('netered the if');
-      NotificationService().notifyItemOnWay(event.data.toString());
-      await flutterLocalNotificationsPlugin.show(
-          int.parse(channel.id),
-          channel.name,
-          channel.description,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-                channel.id, channel.name, channel.description,
-                playSound: true,
-                channelShowBadge: true,
-                priority: Priority.high,
-                icon: '@mipmap/ic_launcher'),
-          ));
-    }
-  });
-
-  FirebaseMessaging.instance.onTokenRefresh.listen((event) {
-    FirebaseFirestore.instance
-        .collection(('user'))
-        .doc(FirebaseAuth.instance.currentUser!.email)
-        .update({'token': event});
-  });
   // final DatabaseReference db = FirebaseDatabase().reference();
   // db.child("restaurants").push().child('vendor_id').set('-MiCZjGpgOoZZQjKGJS6');
 
@@ -169,16 +112,72 @@ Future _setUpIsolate() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
+  await _setUpIsolate();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
+  // await flutterLocalNotificationsPlugin
+  //     .resolvePlatformSpecificImplementation<
+  //         AndroidFlutterLocalNotificationsPlugin>()
+  //     ?.createNotificationChannel(channel);
 
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true, badge: true, sound: true);
-  await _setUpIsolate();
+  FirebaseMessaging.onBackgroundMessage((event) async {
+    debugPrint('backgroung message: ' + event.toString());
+    RemoteNotification? notification = event.notification;
+
+    if (notification != null) {
+      NotificationService().notifyItemOnWay(event.data.toString());
+      flutterLocalNotificationsPlugin.show(
+          int.parse(channel.id),
+          channel.name,
+          channel.description,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+                channel.id, channel.name, channel.description,
+                playSound: true,
+                channelShowBadge: true,
+                priority: Priority.high,
+                icon: '@mipmap/ic_launcher'),
+          ));
+    }
+  });
+
+  FirebaseMessaging.onMessage.listen((event) async {
+    debugPrint('listening for events');
+
+    RemoteNotification? notification = event.notification;
+    debugPrint('message is' + event.data['whatToSend'].toString());
+    debugPrint('this message is to stay for ' + event.ttl.toString());
+    await NotificationService()
+        .notifyItemOnWay(event.data['whatToSend'].toString());
+    debugPrint(event.toString());
+    AndroidNotification? android = event.notification?.android;
+    AppleNotification? ios = event.notification?.apple;
+    if (notification != null && (android != null || ios != null)) {
+      NotificationService().notifyItemOnWay(event.data.toString());
+      await flutterLocalNotificationsPlugin.show(
+          int.parse(channel.id),
+          channel.name,
+          channel.description,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+                channel.id, channel.name, channel.description,
+                playSound: true,
+                channelShowBadge: true,
+                priority: Priority.high,
+                icon: '@mipmap/ic_launcher'),
+          ));
+    }
+  });
+
+  FirebaseMessaging.instance.onTokenRefresh.listen((event) {
+    FirebaseFirestore.instance
+        .collection(('user'))
+        .doc(FirebaseAuth.instance.currentUser!.email)
+        .update({'token': event});
+  });
+  var token = await FirebaseMessaging.instance.getToken();
+  debugPrint('token: ' + token.toString());
   //remember that you haven't made any notification settigns for ios
   runApp(MaterialApp(
     theme: ThemeData(

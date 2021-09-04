@@ -56,24 +56,25 @@ class _LoginState extends State<Login> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          SizedBox(
-                            height: _height * 0.1,
+                          const Flexible(
+                            child: Text(
+                              'Merak',
+                              style: TextStyle(fontSize: 34),
+                            ),
                           ),
-                          const Text(
-                            'Merak',
-                            style: TextStyle(fontSize: 34),
-                          ),
-                          Text(
-                            'Etme',
-                            style: TextStyle(
-                                fontSize: 48, color: Colors.grey[700]),
+                          Flexible(
+                            child: Text(
+                              'Etme',
+                              style: TextStyle(
+                                  fontSize: 48, color: Colors.grey[700]),
+                            ),
                           ),
                           const SizedBox(height: 10),
                           Text('Stay home, we bring it to your door step.',
                               style:
                                   GoogleFonts.shadowsIntoLight(fontSize: 18)),
-                          SizedBox(
-                            height: _height * 0.08,
+                          const SizedBox(
+                            height: 10,
                           ),
                           Theme(
                             data: ThemeData(
@@ -100,8 +101,9 @@ class _LoginState extends State<Login> {
                                 _email = value.trim();
                               },
                               validator: (String? value) {
-                                if (value!.trim().isEmpty)
+                                if (value!.trim().isEmpty) {
                                   return 'Email is required';
+                                }
                               },
                             ),
                           ),
@@ -129,14 +131,14 @@ class _LoginState extends State<Login> {
                                   ),
                                   hintText: '********',
                                   labelText: 'Password',
-                                  labelStyle:
-                                      const TextStyle(color: Colors.black)),
+                                  labelStyle: TextStyle(color: Colors.black)),
                               onChanged: (String value) {
                                 _password = value.trim();
                               },
                               validator: (String? value) {
-                                if (value!.trim().isEmpty)
+                                if (value!.trim().isEmpty) {
                                   return 'Password is required';
+                                }
                               },
                             ),
                           ),

@@ -37,9 +37,8 @@ class NotificationService {
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future showNotification(
-      {bool? ios, bool? android, required String message}) async {
-    if (Platform.isAndroid && android != null) {
+  Future showNotification({required String message}) async {
+    if (Platform.isAndroid) {
       debugPrint('notification sent');
       AndroidNotificationDetails androidPlatformChannelSpecifics =
           const AndroidNotificationDetails(
@@ -54,7 +53,7 @@ class NotificationService {
           NotificationDetails(android: androidPlatformChannelSpecifics);
       await flutterLocalNotificationsPlugin.show(
           0, 'Hi', 'Your food is on its way', generalNotificationDetails);
-    } else if (Platform.isIOS && ios != null) {
+    } else if (Platform.isIOS) {
       const IOSNotificationDetails iosNotificationDetails =
           IOSNotificationDetails(
         subtitle: 'Your food is on its way',
@@ -66,36 +65,31 @@ class NotificationService {
     }
   }
 
-  Future notifyItemOnWay(String vendorName) async {
+  Future notifyItemOnWay(final vendorName) async {
     if (Platform.isAndroid) {
-      debugPrint('notification sent');
+      debugPrint('notification sent mesasge is ' + vendorName.toString());
       AndroidNotificationDetails androidPlatformChannelSpecifics =
-          AndroidNotificationDetails(
+          const AndroidNotificationDetails(
               'channelId' 'Local Notification',
               'Hi' //Required for Android 8.0 or after
-                  '$vendorName is set and on its way', //Required for Android 8.0 or after
-              'Your order will arrive soon', //Required for Android 8.0 or after
+                  'Your food is on its way', //Required for Android 8.0 or after
+              'Your food will arrive soon', //Required for Android 8.0 or after
               importance: Importance.high,
               playSound: true,
               priority: Priority.high);
       var generalNotificationDetails =
           NotificationDetails(android: androidPlatformChannelSpecifics);
       await flutterLocalNotificationsPlugin.show(
-          0,
-          'Hi',
-          'Your order from $vendorName is set and on its way',
-          generalNotificationDetails);
+          0, 'Hi', '$vendorName is on its way', generalNotificationDetails);
     } else if (Platform.isIOS) {
-      IOSNotificationDetails iosNotificationDetails = IOSNotificationDetails(
-        subtitle: 'Your order from $vendorName is set and on its way',
+      const IOSNotificationDetails iosNotificationDetails =
+          IOSNotificationDetails(
+        subtitle: 'Your food is on its way',
       );
-      var generalNotificationDetails =
+      const generalNotificationDetails =
           NotificationDetails(iOS: iosNotificationDetails);
       await flutterLocalNotificationsPlugin.show(
-          0,
-          'HI',
-          'Your order from $vendorName is set and on its way',
-          generalNotificationDetails);
+          0, 'HI', '$vendorName is on its way🕙', generalNotificationDetails);
     }
   }
 }
