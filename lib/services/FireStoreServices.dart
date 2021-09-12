@@ -2,12 +2,51 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
 
 class FireStoreServices {
+  Future getRestaurantsByPopular(String state, String lga) async {
+    try {
+      var docsnap = await FirebaseFirestore.instance
+          .collection('users')
+          .where('isVendor', isEqualTo: 'true')
+          .where('state', isEqualTo: state)
+          .where('lga', isEqualTo: lga)
+          .orderBy('hits')
+          .get();
+      List docs = docsnap.docs.map((e) => e.id).toList();
+      List resDocs =
+          docsnap.docs.map((e) => {'id': e.id, 'data': e.data()}).toList();
+      docsnap = await FirebaseFirestore.instance
+          .collection('foods')
+          .where('vendor', whereIn: docs)
+          .get();
+      var docList = docsnap.docs
+          .map((e) => {
+                'id': e.id,
+                'data': e.data(),
+              })
+          .toList();
+      Map whatToReturn = {'foods': docList, 'restaurants': resDocs};
+      return whatToReturn;
+    } on FirebaseException catch (e) {
+      return Future.error(e.code);
+    }
+  }
+
+  Future getUserData(email) async {
+    try {
+      return await FirebaseFirestore.instance
+          .collection('users')
+          .doc(email)
+          .get();
+    } catch (e) {
+      return {};
+    }
+  }
+
   Future getShippingDetails(user) async {
     var _query = await FirebaseFirestore.instance
         .collection('shippingDetails')
