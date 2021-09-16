@@ -17,11 +17,16 @@ class FireStoreServices {
           .orderBy('hits')
           .get();
       List docs = docsnap.docs.map((e) => e.id).toList();
+
       List resDocs =
           docsnap.docs.map((e) => {'id': e.id, 'data': e.data()}).toList();
+      if (docs.isEmpty) {
+        return [];
+      }
       docsnap = await FirebaseFirestore.instance
           .collection('foods')
           .where('vendor', whereIn: docs)
+          .orderBy('orders', descending: true)
           .get();
       var docList = docsnap.docs
           .map((e) => {
@@ -86,6 +91,7 @@ class FireStoreServices {
           'isDelivered': false,
           'isMade': false,
           'item': itemData['id'],
+          'name': itemData['name'],
           'messagetoSeller': itemData['messageToSeller'],
           'quantity': itemData['quantity'],
           'shouldSendAgain': true,
@@ -123,10 +129,15 @@ class FireStoreServices {
     }
   }
 
-  Future getRestaurants() async {
+  Future getRestaurants(String state, String lga) async {
     try {
-      var _docs =
-          await FirebaseFirestore.instance.collection('restaurants').get();
+      var _docs = await FirebaseFirestore.instance
+          .collection('users')
+          .where('isVendor', isEqualTo: 'true')
+          .where('state', isEqualTo: state)
+          .where('lga', isEqualTo: lga)
+          .orderBy('hits')
+          .get();
       List _restaurants =
           _docs.docs.map((e) => {'id': e.id, 'data': e.data()}).toList();
       for (int i = 0; i < 6; i++) {

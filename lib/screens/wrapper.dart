@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:meraketme/main.dart';
 import 'package:meraketme/services/NotificationServices.dart';
+import 'package:meraketme/widgets/bottombarWidget.dart';
 
 import 'home.dart';
 import 'login.dart';
@@ -32,7 +33,7 @@ class _WrapperState extends State<Wrapper> {
           : Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (BuildContext context) => const Home()));
+                  builder: (BuildContext context) => BottomBarWidget()));
     } catch (e) {
       debugPrint(e.toString());
       showDialog(

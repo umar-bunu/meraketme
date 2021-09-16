@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/painting.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:meraketme/widgets/bottombarWidget.dart';
 
 import 'home.dart';
 import 'register.dart';
@@ -181,14 +182,14 @@ class _LoginState extends State<Login> {
                                         Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
-                                                builder:
-                                                    (BuildContext context) =>
-                                                        widget.payload != null
-                                                            ? Home(
-                                                                payload: widget
-                                                                    .payload,
-                                                              )
-                                                            : const Home()));
+                                                builder: (BuildContext
+                                                        context) =>
+                                                    widget.payload != null
+                                                        ? Home(
+                                                            payload:
+                                                                widget.payload,
+                                                          )
+                                                        : BottomBarWidget()));
                                       } on FirebaseAuthException catch (e) {
                                         setState(() {
                                           _isLoading = false;
@@ -343,7 +344,7 @@ class _LoginState extends State<Login> {
                                   alignment: Alignment.centerLeft,
                                   child: GestureDetector(
                                     onTap: () {
-                                      Navigator.push(
+                                      Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
                                               builder: (BuildContext context) =>

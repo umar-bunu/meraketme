@@ -18,12 +18,16 @@ class _RestaurantViewState extends State<RestaurantView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.purple),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: FutureBuilder(
             future: FireStoreServices()
-                .getRestaurantDetails(widget.restaurant['data']['vendor']),
+                .getRestaurantDetails(widget.restaurant['data']['email']),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Center(
@@ -95,6 +99,7 @@ class _RestaurantViewState extends State<RestaurantView> {
                                     );
                                   },
                                   onSuggestionSelected: (suggestion) {
+                                    Map suggestionMap = suggestion as Map;
                                     showModalBottomSheet(
                                         isScrollControlled: true,
                                         context: context,
@@ -102,18 +107,42 @@ class _RestaurantViewState extends State<RestaurantView> {
                                               children: [
                                                 Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.end,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
-                                                    IconButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        icon: const Icon(
-                                                          Icons.cancel_outlined,
-                                                          color: Colors.purple,
-                                                          size: 30,
-                                                        ))
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Text(
+                                                          suggestionMap['data']
+                                                              ['name'],
+                                                          style:
+                                                              const TextStyle(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontSize:
+                                                                      18)),
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      children: [
+                                                        IconButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                            icon: const Icon(
+                                                              Icons
+                                                                  .cancel_outlined,
+                                                              color:
+                                                                  Colors.purple,
+                                                              size: 30,
+                                                            ))
+                                                      ],
+                                                    ),
                                                   ],
                                                 ),
                                                 Food_view(
@@ -157,7 +186,6 @@ class _RestaurantViewState extends State<RestaurantView> {
                         ),
                       ),
                       placeholder: (context, url) {
-                        debugPrint(url);
                         return const CircularProgressIndicator();
                       },
                       errorWidget: (context, url, error) =>
@@ -173,75 +201,100 @@ class _RestaurantViewState extends State<RestaurantView> {
                           shrinkWrap: true,
                           children: [
                             ...(snapmap.map(
-                              (e) => Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: ListTile(
-                                  onTap: () {
-                                    showModalBottomSheet(
-                                        isScrollControlled: true,
-                                        context: context,
-                                        builder: (BuildContext context) => Wrap(
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  children: [
-                                                    IconButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        icon: const Icon(
-                                                          Icons.cancel_outlined,
-                                                          color: Colors.purple,
-                                                          size: 30,
-                                                        ))
-                                                  ],
+                              (e) => Card(
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: ListTile(
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                          isScrollControlled: true,
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              Wrap(
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Text(
+                                                            e['data']['name'],
+                                                            style:
+                                                                const TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontSize:
+                                                                        18)),
+                                                      ),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          IconButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                              },
+                                                              icon: const Icon(
+                                                                Icons
+                                                                    .cancel_outlined,
+                                                                color: Colors
+                                                                    .purple,
+                                                                size: 30,
+                                                              ))
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Food_view(selectedFood: e)
+                                                ],
+                                              ));
+                                    },
+                                    leading: CachedNetworkImage(
+                                      imageUrl: e['data']['picture'],
+                                      imageBuilder: (context, imageProvider) =>
+                                          GestureDetector(
+                                        onTap: () {},
+                                        child: Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: snapshot.hasError
+                                              ? const SizedBox()
+                                              : Container(
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10)),
                                                 ),
-                                                Food_view(selectedFood: e)
-                                              ],
-                                            ));
-                                  },
-                                  leading: CachedNetworkImage(
-                                    imageUrl: e['data']['picture'],
-                                    imageBuilder: (context, imageProvider) =>
-                                        GestureDetector(
-                                      onTap: () {},
-                                      child: Container(
-                                        alignment: Alignment.centerLeft,
-                                        child: snapshot.hasError
-                                            ? const SizedBox()
-                                            : Container(
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10)),
-                                              ),
-                                        height: 100,
-                                        width: 100,
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                            onError: (error, stack) {
-                                              debugPrint(error.toString());
-                                            },
-                                            image: imageProvider,
-                                            fit: BoxFit.contain,
+                                          height: 100,
+                                          width: 100,
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                              onError: (error, stack) {
+                                                debugPrint(error.toString());
+                                              },
+                                              image: imageProvider,
+                                              fit: BoxFit.contain,
+                                            ),
                                           ),
                                         ),
                                       ),
+                                      placeholder: (context, url) {
+                                        return const CircularProgressIndicator();
+                                      },
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
                                     ),
-                                    placeholder: (context, url) {
-                                      debugPrint(url);
-                                      return const CircularProgressIndicator();
-                                    },
-                                    errorWidget: (context, url, error) =>
-                                        const Icon(Icons.error),
-                                  ),
-                                  title: Text(e['data']['name']),
-                                  trailing: Text(
-                                    'N' + e['data']['price'],
-                                    overflow: TextOverflow.ellipsis,
+                                    title: Text(e['data']['name']),
+                                    trailing: Text(
+                                      'N' + e['data']['price'],
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ),
                               ),

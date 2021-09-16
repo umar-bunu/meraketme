@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:meraketme/services/OtherServices.dart';
+import 'package:meraketme/widgets/bottombarWidget.dart';
 import '../services/globals.dart' as globals;
 import 'home.dart';
+import 'login.dart';
 
 class Register extends StatefulWidget {
   const Register({Key? key}) : super(key: key);
@@ -27,6 +29,19 @@ class _RegisterState extends State<Register> {
   String _phoneNo = '';
   String _selectedState = '';
   String _selectedLGA = '';
+  List _states = [];
+  Future _getData() async {
+    try {
+      if (mounted) {
+        setState(() async {
+          _states = await OtherServices().getStates();
+        });
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // debugPrint('all keys: ' + globals.states.elementAt(0).keys.toString());
@@ -241,13 +256,21 @@ class _RegisterState extends State<Register> {
                           ),
                           TypeAheadFormField(
                               validator: (value) {
-                                var tempList = globals.states.where((element) =>
-                                    element.keys.first
-                                        .toLowerCase()
-                                        .contains(value!.trim().toLowerCase()));
-                                if (tempList.isEmpty) {
-                                  return 'State not found';
+                                if (_states.isNotEmpty) {
+                                  var _tempList = _states.where((element) =>
+                                      element.toString().toLowerCase().contains(
+                                          value!.trim().toLowerCase()));
+                                  if (_tempList.isEmpty) {
+                                    return 'State not found';
+                                  }
                                 }
+                                // var tempList = globals.states.where((element) =>
+                                //     element.keys.first
+                                //         .toLowerCase()
+                                //         .contains(value!.trim().toLowerCase()));
+                                // if (tempList.isEmpty) {
+                                //   return 'State not found';
+                                // }
                               },
                               textFieldConfiguration: TextFieldConfiguration(
                                   decoration: const InputDecoration(
@@ -342,14 +365,29 @@ class _RegisterState extends State<Register> {
                                 });
                               }),
                           const SizedBox(
-                            height: 40,
+                            height: 10,
+                          ),
+                          Center(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Login()));
+                              },
+                              child: const Text(
+                                  'Already have an account? Login',
+                                  style: TextStyle(
+                                      decoration: TextDecoration.underline)),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
                           ),
                           ElevatedButton(
                               onPressed: () async {
                                 if (_isLoading != 0) return;
-                                setState(() {
-                                  _isLoading = 1;
-                                });
+
                                 if (!_formKey.currentState!.validate()) return;
 
                                 if (_password != _passwordConfirm) {
@@ -372,6 +410,9 @@ class _RegisterState extends State<Register> {
                                 }
                                 var _token =
                                     await FirebaseMessaging.instance.getToken();
+                                setState(() {
+                                  _isLoading = 1;
+                                });
                                 try {
                                   await FirebaseAuth.instance
                                       .createUserWithEmailAndPassword(
@@ -397,7 +438,8 @@ class _RegisterState extends State<Register> {
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => const Home()));
+                                          builder: (context) =>
+                                              BottomBarWidget()));
                                 } on FirebaseAuthException catch (e) {
                                   showDialog(
                                       context: context,
@@ -417,7 +459,7 @@ class _RegisterState extends State<Register> {
                                                             MaterialPageRoute(
                                                                 builder:
                                                                     (context) =>
-                                                                        const Home()))
+                                                                        BottomBarWidget()))
                                                         : Navigator.pop(
                                                             context);
                                                   },

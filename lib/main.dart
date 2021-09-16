@@ -153,7 +153,7 @@ Future<void> main() async {
             primaryVariant: Colors.white,
             onSurface: Colors.white,
             secondary: Colors.white,
-            background: Colors.white60,
+            background: Colors.white,
             onPrimary: Colors.white,
             secondaryVariant: Colors.black,
             error: Colors.red),

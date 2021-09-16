@@ -1,5 +1,6 @@
 // ignore_for_file: file_names
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import './globals.dart' as globals;
 
@@ -42,5 +43,16 @@ class OtherServices {
     var filtered = filteredItems.values.first
         .where((e) => e.toString().toLowerCase().contains(lga.toLowerCase()));
     return filtered;
+  }
+
+  Future getStates() async {
+    try {
+      var res =
+          await Dio().get("http://locationsng-api.herokuapp.com/api/v1/states");
+      debugPrint(res.toString());
+      return await res.data.map((eachData) => eachData['name']).toList();
+    } catch (e) {
+      return Future.error(e);
+    }
   }
 }

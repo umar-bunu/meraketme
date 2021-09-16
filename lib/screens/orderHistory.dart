@@ -10,7 +10,8 @@ import 'package:meraketme/services/FireStoreServices.dart';
 import 'package:meraketme/widgets/expandedFoodToOrder.dart';
 
 class OrderHistory extends StatefulWidget {
-  const OrderHistory({Key? key}) : super(key: key);
+  var userData;
+  OrderHistory({Key? key, this.userData}) : super(key: key);
 
   @override
   _OrderHistoryState createState() => _OrderHistoryState();
@@ -116,7 +117,14 @@ class _OrderHistoryState extends State<OrderHistory> {
                                     return const CircularProgressIndicator();
                                   },
                                   errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
+                                      Container(
+                                          height: _width * 0.25,
+                                          width: _width * 0.25,
+                                          alignment: Alignment.center,
+                                          child: const Icon(
+                                            Icons.error,
+                                            color: Colors.purple,
+                                          )),
                                 ),
                                 Flexible(
                                   child: Padding(
@@ -127,7 +135,7 @@ class _OrderHistoryState extends State<OrderHistory> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          element['data']['item'],
+                                          element['data']['itemName'],
                                           style: const TextStyle(fontSize: 18),
                                           overflow: TextOverflow.ellipsis,
                                         ),

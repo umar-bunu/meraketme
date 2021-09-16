@@ -11,7 +11,8 @@ import 'package:meraketme/services/FireStoreServices.dart';
 import 'package:meraketme/widgets/showSuccessAlert.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({Key? key}) : super(key: key);
+  var userData;
+  Profile({Key? key, this.userData}) : super(key: key);
 
   @override
   _ProfileState createState() => _ProfileState();

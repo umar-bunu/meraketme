@@ -590,17 +590,26 @@ final List<Map<String, List>> states = [
   },
   {
     'Lagos': [
-      'Alagomeji',
-      'Epetedo',
-      'Glover/ebute Metta',
-      'Iwaya',
-      'Maroko/ebute Metta',
-      'Oko-baba',
-      'Olaleye Village',
-      'Otto/iddo',
-      'Oyadiran Estate/abule-oja',
-      'Oyingbo Market/ebute Metta',
-      'Yaba/igbobi'
+      'Agege',
+      'Ajeromi/ifelodun',
+      'Alimosho',
+      'Amuwo-odofin',
+      'Apapa',
+      'Badagry',
+      'Epe',
+      'Eti-osa',
+      'Ibeju/lekki',
+      'Ifako-ijaye',
+      'Ikeja',
+      'Ikorodu',
+      'Kosofe',
+      'Lagos Island',
+      'Lagos Mainland',
+      'Mushin',
+      'Ojo',
+      'Oshodi/isolo',
+      'Somolu',
+      'Surulere'
     ]
   },
   {
