@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meraketme/screens/Profile.dart';
 import 'package:meraketme/screens/Restaurants.dart';
+import 'package:meraketme/screens/UserSettings.dart';
 import 'package:meraketme/screens/home.dart';
 import 'package:meraketme/screens/orderHistory.dart';
 import 'package:meraketme/screens/shopping_cart.dart';
@@ -24,6 +25,11 @@ class _BottomBarWidgetState extends State<BottomBarWidget>
   List _foodList = [];
   List _restaurantList = [];
   List _foodListByPromos = [];
+  final Stream<DocumentSnapshot> _stream = FirebaseFirestore.instance
+      .collection('users')
+      .doc(FirebaseAuth.instance.currentUser!.email)
+      .snapshots();
+
   var _userData;
 
   void _onItemClicked(int index) {
@@ -36,6 +42,7 @@ class _BottomBarWidgetState extends State<BottomBarWidget>
   @override
   void initState() {
     super.initState();
+
     tabController = TabController(length: 5, vsync: this);
   }
 
@@ -49,10 +56,7 @@ class _BottomBarWidgetState extends State<BottomBarWidget>
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('users')
-              .doc(FirebaseAuth.instance.currentUser!.email)
-              .snapshots(),
+          stream: _stream,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               DocumentSnapshot _docSnap = snapshot.data as DocumentSnapshot;
@@ -103,7 +107,7 @@ class _BottomBarWidgetState extends State<BottomBarWidget>
                   ),
                   const ShoppingCart(),
                   OrderHistory(userData: _userData),
-                  Profile(userData: _userData)
+                  UserSettings(userData: _userData)
                 ],
               );
             } else if (snapshot.hasError) {
@@ -117,24 +121,36 @@ class _BottomBarWidgetState extends State<BottomBarWidget>
             }
           }),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined), label: 'Home'),
+              icon: Icon(_selectedIndex == 0
+                  ? Icons.home_rounded
+                  : Icons.home_outlined),
+              label: 'Home'),
           BottomNavigationBarItem(
               icon: Icon(
-                Icons.restaurant_outlined,
+                _selectedIndex == 1
+                    ? Icons.restaurant_rounded
+                    : Icons.restaurant_outlined,
               ),
               label: 'Restaurants'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_basket_outlined), label: 'My Basket'),
+              icon: Icon(_selectedIndex == 2
+                  ? Icons.shopping_basket_rounded
+                  : Icons.shopping_basket_outlined),
+              label: 'My Basket'),
           BottomNavigationBarItem(
               icon: Icon(
-                Icons.history_outlined,
+                _selectedIndex == 3
+                    ? Icons.history_outlined
+                    : Icons.history_toggle_off_outlined,
               ),
               label: 'My Orders'),
           BottomNavigationBarItem(
               icon: Icon(
-                Icons.person_outline,
+                _selectedIndex == 4
+                    ? Icons.person_rounded
+                    : Icons.person_outline,
               ),
               label: 'Settings'),
         ],

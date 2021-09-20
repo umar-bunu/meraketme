@@ -52,10 +52,11 @@ class FireStoreServices {
     }
   }
 
-  Future getShippingDetails(user) async {
+  Future getShippingDetails() async {
     var _query = await FirebaseFirestore.instance
         .collection('shippingDetails')
-        .where('email', isEqualTo: user)
+        .doc(FirebaseAuth.instance.currentUser!.email)
+        .collection('locations')
         .get();
     var _docs = _query.docs
         .map((element) => {'id': element.id, 'data': element.data()});

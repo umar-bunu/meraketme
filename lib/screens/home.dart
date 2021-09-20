@@ -25,8 +25,10 @@ class _HomeState extends State<Home> {
   Future _getUserData() async {
     var docs = await FireStoreServices().getRestaurantsByPopular(
         widget.userData['data']['state'], widget.userData['data']['lga']);
-    if (docs.isNotEmpty) _foodListByPromos = List.from(docs['foods']);
-    if (docs.isNotEmpty) _restaurantList = List.from(docs['restaurants']);
+    if (docs['foods'].isNotEmpty) _foodListByPromos = List.from(docs['foods']);
+    if (docs['restaurants'].isNotEmpty) {
+      _restaurantList = List.from(docs['restaurants']);
+    }
     setState(() {
       _restaurantList
           .sort((a, b) => b['data']['hits'].compareTo(a['data']['hits']));
@@ -126,8 +128,8 @@ class _HomeState extends State<Home> {
                                           padding: const EdgeInsets.all(4),
                                           width: 30,
                                           height: 30,
-                                          margin:
-                                              EdgeInsets.only(top: 3, right: 3),
+                                          margin: const EdgeInsets.only(
+                                              top: 3, right: 3),
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
                                             borderRadius:

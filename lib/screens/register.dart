@@ -219,9 +219,6 @@ class _RegisterState extends State<Register> {
                               },
                             ),
                           ),
-                          const SizedBox(
-                            height: 18,
-                          ),
                           Theme(
                             data: ThemeData(
                               primaryColor: Colors.purple,
@@ -256,21 +253,13 @@ class _RegisterState extends State<Register> {
                           ),
                           TypeAheadFormField(
                               validator: (value) {
-                                if (_states.isNotEmpty) {
-                                  var _tempList = _states.where((element) =>
-                                      element.toString().toLowerCase().contains(
-                                          value!.trim().toLowerCase()));
-                                  if (_tempList.isEmpty) {
-                                    return 'State not found';
-                                  }
+                                var tempList = globals.states.where((element) =>
+                                    element.keys.first
+                                        .toLowerCase()
+                                        .contains(value!.trim().toLowerCase()));
+                                if (tempList.isEmpty) {
+                                  return 'State not found';
                                 }
-                                // var tempList = globals.states.where((element) =>
-                                //     element.keys.first
-                                //         .toLowerCase()
-                                //         .contains(value!.trim().toLowerCase()));
-                                // if (tempList.isEmpty) {
-                                //   return 'State not found';
-                                // }
                               },
                               textFieldConfiguration: TextFieldConfiguration(
                                   decoration: const InputDecoration(

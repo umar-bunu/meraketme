@@ -23,9 +23,15 @@ class _OrderHistoryState extends State<OrderHistory> {
     double _height = MediaQuery.of(context).size.height;
     double _width = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         centerTitle: true,
-        title: const Text('My Orders'),
+        title: const Text(
+          'My Orders',
+          style: TextStyle(color: Colors.purple),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
@@ -90,79 +96,83 @@ class _OrderHistoryState extends State<OrderHistory> {
                                     ));
                           },
                           child: Card(
+                              elevation: 5,
                               child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                CachedNetworkImage(
-                                  imageUrl: element['data']['picture'],
-                                  imageBuilder: (context, imageProvider) =>
-                                      Container(
-                                    height: _width * 0.25,
-                                    width: _width * 0.25,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        onError: (error, stack) {
-                                          debugPrint(error.toString());
-                                        },
-                                        image: imageProvider,
-                                        fit: BoxFit.contain,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    CachedNetworkImage(
+                                      imageUrl: element['data']['picture'],
+                                      imageBuilder: (context, imageProvider) =>
+                                          Container(
+                                        height: _width * 0.25,
+                                        width: _width * 0.25,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            onError: (error, stack) {
+                                              debugPrint(error.toString());
+                                            },
+                                            image: imageProvider,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ),
+                                      placeholder: (context, url) {
+                                        debugPrint(url);
+                                        return const CircularProgressIndicator();
+                                      },
+                                      errorWidget: (context, url, error) =>
+                                          Container(
+                                              height: _width * 0.25,
+                                              width: _width * 0.25,
+                                              alignment: Alignment.center,
+                                              child: const Icon(
+                                                Icons.error,
+                                                color: Colors.purple,
+                                              )),
+                                    ),
+                                    Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              element['data']['itemName'],
+                                              style:
+                                                  const TextStyle(fontSize: 18),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text('By ' +
+                                                element['data']['vendorName'])
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  placeholder: (context, url) {
-                                    debugPrint(url);
-                                    return const CircularProgressIndicator();
-                                  },
-                                  errorWidget: (context, url, error) =>
-                                      Container(
-                                          height: _width * 0.25,
-                                          width: _width * 0.25,
-                                          alignment: Alignment.center,
-                                          child: const Icon(
-                                            Icons.error,
-                                            color: Colors.purple,
-                                          )),
-                                ),
-                                Flexible(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          element['data']['itemName'],
-                                          style: const TextStyle(fontSize: 18),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        Text('By ' +
-                                            element['data']['vendorName'])
-                                      ],
+                                    Container(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      width: _width * 0.25,
+                                      child: Text(
+                                        'N' +
+                                            (double.parse(element['data']
+                                                            ['price']
+                                                        .toString()) *
+                                                    double.parse(element['data']
+                                                            ['quantity']
+                                                        .toString()))
+                                                .toString(),
+                                        style: const TextStyle(fontSize: 18.5),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  width: _width * 0.25,
-                                  child: Text(
-                                    'N' +
-                                        (double.parse(element['data']['price']
-                                                    .toString()) *
-                                                double.parse(element['data']
-                                                        ['quantity']
-                                                    .toString()))
-                                            .toString(),
-                                    style: const TextStyle(fontSize: 18.5),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )),
+                              )),
                         )))
                   ],
                 );

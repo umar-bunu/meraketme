@@ -1,14 +1,20 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, must_be_immutable
 
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:meraketme/screens/login.dart';
 import 'package:meraketme/services/FireStoreServices.dart';
+import 'package:meraketme/services/OtherServices.dart';
 import 'package:meraketme/widgets/showSuccessAlert.dart';
+
+import '../services/globals.dart' as globals;
 
 class Profile extends StatefulWidget {
   var userData;
@@ -27,65 +33,34 @@ class _ProfileState extends State<Profile> {
 
   String _password = '';
   String _passwordConfirm = '';
-  String _doorNumApt = '';
-  String _street = '';
-  String _state = '';
+
   String _phoneNo = '';
 
-  String _phoneDocId = '';
-  String _addressDocId = '';
-
   String _errorText = '';
-  String _phoneErrorText = '';
   String _addressErrorText = '';
 
-  Future _getDetails() async {
-    try {
-      List _docs = await FireStoreServices()
-          .getShippingDetails(FirebaseAuth.instance.currentUser!.email);
-      setState(() {
-        _addressDocId = _docs.first['id'];
-        _doorNumApt = _docs.first['data']['doorNumApt'];
-        _street = _docs.first['data']['street'];
-        _state = _docs.first['data']['state'];
-      });
-      var _query = await FirebaseFirestore.instance
-          .collection('users')
-          .where('email', isEqualTo: FirebaseAuth.instance.currentUser!.email)
-          .get();
-      _phoneDocId = _query.docs.first.id;
-
-      setState(() {
-        _phoneNo = _query.docs.first.data()['phone'];
-      });
-    } on FirebaseException catch (e) {
-      showDialog(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-                title: const Text('Ooops'),
-                content: Text(e.code + '\n Please try again Later'),
-                actions: [
-                  ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Ok'))
-                ],
-              ));
-    }
-  }
-
+  String _displayName = '';
+  TextEditingController _stateController = TextEditingController();
+  TextEditingController _lgaController = TextEditingController();
   @override
   void initState() {
     super.initState();
-    _getDetails();
+    setState(() {
+      _phoneNo = widget.userData['data']['phone'] ?? '';
+      _lgaController.text = widget.userData['data']['lga'] ?? '';
+      _stateController.text = widget.userData['data']['state'] ?? '';
+      _displayName = widget.userData['data']['name'] ?? '';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('build');
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(),
-      body: Padding(
+      body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Stack(
           children: [
@@ -224,14 +199,17 @@ class _ProfileState extends State<Profile> {
                               }
                             }
                           },
-                          child: const Text(
-                            'Update Password',
-                            style: TextStyle(fontSize: 16),
+                          child: const Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Text(
+                              'Update Password',
+                              style: TextStyle(fontSize: 18),
+                            ),
                           )),
                       const SizedBox(height: 15),
                       const Center(
                         child: Text(
-                          'Phone number',
+                          'User Details',
                           style: TextStyle(
                               fontSize: 17, fontWeight: FontWeight.w500),
                         ),
@@ -242,6 +220,40 @@ class _ProfileState extends State<Profile> {
                           primaryColorDark: Colors.purple,
                         ),
                         child: TextFormField(
+                          initialValue: _displayName,
+                          autocorrect: false,
+                          decoration: const InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.purple)),
+                              border: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.purple)),
+                              icon: Icon(
+                                Icons.lock_rounded,
+                                color: Colors.purple,
+                              ),
+                              hintText: 'Merak Etme',
+                              labelText: 'Name',
+                              labelStyle: TextStyle(color: Colors.black)),
+                          onChanged: (String value) {
+                            _displayName = value.trim();
+                          },
+                          validator: (String? value) {
+                            if (value!.trim().isEmpty) {
+                              return 'Field is required';
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Theme(
+                        data: ThemeData(
+                          primaryColor: Colors.purple,
+                          primaryColorDark: Colors.purple,
+                        ),
+                        child: TextFormField(
+                          initialValue: _phoneNo.replaceFirst('+', ''),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
                           ],
@@ -269,62 +281,206 @@ class _ProfileState extends State<Profile> {
                       const SizedBox(
                         height: 10,
                       ),
-                      _phoneErrorText.isEmpty
-                          ? const SizedBox()
-                          : SizedBox(
-                              height: 20,
-                              child: Text(
-                                _phoneErrorText,
-                                style: const TextStyle(
-                                    fontSize: 16, color: Colors.red),
-                              ),
-                            ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Theme(
+                        data: ThemeData(
+                          primaryColor: Colors.purple,
+                          primaryColorDark: Colors.purple,
+                        ),
+                        child: TypeAheadFormField(
+                            validator: (value) {
+                              var tempList = globals.states.where((element) =>
+                                  element.keys.first
+                                      .toLowerCase()
+                                      .contains(value!.trim().toLowerCase()));
+
+                              if (tempList.isEmpty) {
+                                return 'State not found';
+                              } else {
+                                _stateController.text = value!
+                                    .trim()
+                                    .replaceFirst(
+                                        value
+                                            .trim()
+                                            .substring(0, 1)
+                                            .toUpperCase(),
+                                        value.trim().substring(0, 1));
+                              }
+                            },
+                            textFieldConfiguration: TextFieldConfiguration(
+                                decoration: const InputDecoration(
+                                    icon: Icon(Icons.map, color: Colors.purple),
+                                    labelText: 'State',
+                                    enabledBorder: UnderlineInputBorder(),
+                                    border: UnderlineInputBorder(),
+                                    focusedBorder: UnderlineInputBorder()),
+                                controller: _stateController),
+                            suggestionsCallback: (pattern) async {
+                              if (pattern.isNotEmpty) {
+                                return await OtherServices()
+                                    .getStatePattern(pattern);
+                              } else {
+                                return [];
+                              }
+                            },
+                            itemBuilder: (_, item) {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(
+                                  item.toString(),
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              );
+                            },
+                            onSuggestionSelected: (suggestion) {
+                              setState(() {
+                                _stateController.text = suggestion
+                                    .toString()
+                                    .replaceFirst(
+                                        suggestion.toString().substring(0, 1),
+                                        suggestion
+                                            .toString()
+                                            .substring(0, 1)
+                                            .toUpperCase());
+                              });
+                            }),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Theme(
+                        data: ThemeData(
+                          primaryColor: Colors.purple,
+                          primaryColorDark: Colors.purple,
+                        ),
+                        child: TypeAheadFormField(
+                            validator: (value) {
+                              var tempList = globals.states
+                                  .where((element) => element.keys.first
+                                      .toLowerCase()
+                                      .contains(
+                                          _stateController.text.toLowerCase()))
+                                  .first
+                                  .values
+                                  .first
+                                  .where((element) => element
+                                      .toString()
+                                      .toLowerCase()
+                                      .contains(value!.trim().toLowerCase()));
+                              if (tempList.isEmpty) {
+                                return 'L.G.A not found';
+                              } else {
+                                _lgaController.text = value!
+                                    .trim()
+                                    .replaceFirst(
+                                        value
+                                            .trim()
+                                            .substring(0, 1)
+                                            .toUpperCase(),
+                                        value.trim().substring(0, 1));
+                              }
+                            },
+                            textFieldConfiguration: TextFieldConfiguration(
+                                decoration: const InputDecoration(
+                                    icon: Icon(Icons.map, color: Colors.purple),
+                                    labelText: 'L.G.A',
+                                    enabledBorder: UnderlineInputBorder(),
+                                    border: UnderlineInputBorder(),
+                                    focusedBorder: UnderlineInputBorder()),
+                                controller: _lgaController),
+                            suggestionsCallback: (pattern) async {
+                              if (pattern.isNotEmpty) {
+                                return await OtherServices().getLgaPattern(
+                                    _stateController.text, pattern);
+                              } else {
+                                return [];
+                              }
+                            },
+                            itemBuilder: (_, item) {
+                              return Text(
+                                item.toString(),
+                                style: const TextStyle(fontSize: 16),
+                              );
+                            },
+                            onSuggestionSelected: (suggestion) {
+                              setState(() {
+                                _lgaController.text = suggestion
+                                    .toString()
+                                    .replaceFirst(
+                                        suggestion.toString().substring(0, 1),
+                                        suggestion
+                                            .toString()
+                                            .substring(0, 1)
+                                            .toUpperCase());
+                              });
+                            }),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
                       ElevatedButton(
                           onPressed: () async {
-                            if (_isLoading) {
-                              return;
-                            }
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            var _stateTemp = _stateController.text + '';
+                            var _lgaTemp = _lgaController.text + '';
+                            _stateTemp = _stateTemp.replaceFirst(
+                                _stateTemp.substring(0, 1),
+                                _stateTemp.substring(0, 1).toUpperCase());
+                            _lgaTemp = _lgaTemp.replaceFirst(
+                                _lgaTemp.substring(0, 1),
+                                _lgaTemp.substring(0, 1).toUpperCase());
+                            debugPrint(_stateTemp);
 
-                            if (_phoneNo.isEmpty) {
+                            if (globals.states
+                                .where((eachElement) =>
+                                    eachElement.keys.first == _stateTemp &&
+                                    eachElement.values.first.contains(_lgaTemp))
+                                .isEmpty) {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      AlertDialog(
+                                        content: Text(
+                                          _stateTemp +
+                                              ' has no LGA named ' +
+                                              _lgaTemp +
+                                              '\nPlease make sure state and LGA do match.',
+                                          overflow: TextOverflow.clip,
+                                        ),
+                                        actions: [
+                                          ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('Ok'))
+                                        ],
+                                      ));
                               setState(() {
-                                _phoneErrorText =
-                                    'Invalid phone. Please make sure to put a valid phone as this will be used by the vendor to contact you';
+                                _isLoading = false;
                               });
                               return;
                             }
-
-                            setState(() {
-                              _phoneErrorText = '';
-                              _isLoading = true;
-                            });
                             try {
-                              if (_phoneDocId.isEmpty) {
-                                var _query = await FirebaseFirestore.instance
-                                    .collection('users')
-                                    .where('email',
-                                        isEqualTo: FirebaseAuth
-                                            .instance.currentUser!.email)
-                                    .get();
-                                await FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(_query.docs.first.id)
-                                    .set({
-                                  'isVendor': false,
-                                  'email':
-                                      FirebaseAuth.instance.currentUser!.email,
-                                  'phone': '+' + _phoneNo
-                                });
-                              } else {
-                                await FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(_phoneDocId)
-                                    .set({
-                                  'isVendor': false,
-                                  'email':
-                                      FirebaseAuth.instance.currentUser!.email,
-                                  'phone': '+' + _phoneNo
-                                });
-                              }
+                              var token =
+                                  await FirebaseMessaging.instance.getToken();
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(FirebaseAuth.instance.currentUser!.email)
+                                  .set({
+                                'isVendor': false,
+                                'email':
+                                    FirebaseAuth.instance.currentUser!.email,
+                                'phone': _phoneNo,
+                                'state': _stateTemp,
+                                'lga': _lgaTemp,
+                                'token': token,
+                                'name': _displayName,
+                              });
                               setState(() {
                                 _isLoading = false;
                                 _isShowingSuccessMessage = true;
@@ -336,122 +492,15 @@ class _ProfileState extends State<Profile> {
                               });
                             } on FirebaseException catch (e) {
                               setState(() {
-                                _phoneErrorText = e.code;
                                 _isLoading = false;
+                                _addressErrorText = e.code;
                               });
                             }
                           },
                           child: const Text(
-                            'Update Phone',
-                            style: TextStyle(fontSize: 17),
-                          ))
-                    ],
-                  ),
-                ),
-                Form(
-                  key: _shippingFormKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      const Center(
-                          child: Text(
-                        'Shipping details',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500),
-                      )),
-                      Theme(
-                        data: ThemeData(
-                          primaryColor: Colors.purple,
-                          primaryColorDark: Colors.purple,
-                        ),
-                        child: TextFormField(
-                          autocorrect: false,
-                          decoration: InputDecoration(
-                              focusedBorder: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.purple)),
-                              border: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.purple)),
-                              icon: const Icon(
-                                Icons.lock_rounded,
-                                color: Colors.purple,
-                              ),
-                              hintText: _doorNumApt.isEmpty
-                                  ? 'DoorNo, Apt Name (leave blank if none)'
-                                  : _doorNumApt,
-                              labelText: 'House address',
-                              labelStyle: const TextStyle(color: Colors.black)),
-                          onChanged: (String value) {
-                            _doorNumApt = value.trim();
-                          },
-                          validator: (String? value) {},
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData(
-                          primaryColor: Colors.purple,
-                          primaryColorDark: Colors.purple,
-                        ),
-                        child: TextFormField(
-                          autocorrect: false,
-                          decoration: InputDecoration(
-                              focusedBorder: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.purple)),
-                              border: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.purple)),
-                              icon: const Icon(
-                                Icons.lock_rounded,
-                                color: Colors.purple,
-                              ),
-                              hintText: _street.isNotEmpty
-                                  ? _street
-                                  : 'Goodluck Ebele Road, F. lowcost',
-                              labelText: 'Street name',
-                              labelStyle: const TextStyle(color: Colors.black)),
-                          onChanged: (String value) {
-                            _street = value.trim();
-                          },
-                          validator: (String? value) {
-                            if (value!.trim().isEmpty) {
-                              return 'Field is required';
-                            }
-                          },
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData(
-                          primaryColor: Colors.purple,
-                          primaryColorDark: Colors.purple,
-                        ),
-                        child: TextFormField(
-                          autocorrect: false,
-                          decoration: InputDecoration(
-                              focusedBorder: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.purple)),
-                              border: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.purple)),
-                              icon: const Icon(
-                                Icons.lock_rounded,
-                                color: Colors.purple,
-                              ),
-                              hintText: _state.isEmpty ? 'Gombe State' : _state,
-                              labelText: 'State/City',
-                              labelStyle: const TextStyle(color: Colors.black)),
-                          onChanged: (String value) {
-                            _password = value.trim();
-                          },
-                          validator: (String? value) {
-                            if (value!.trim().isEmpty) {
-                              return 'Password is required';
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
+                            'Update Details',
+                            style: TextStyle(fontSize: 18),
+                          )),
                       _addressErrorText.isEmpty
                           ? const SizedBox()
                           : SizedBox(
@@ -461,55 +510,9 @@ class _ProfileState extends State<Profile> {
                                 style: const TextStyle(
                                     fontSize: 17, color: Colors.red),
                               )),
-                      ElevatedButton(
-                          onPressed: () async {
-                            if (_state.isEmpty ||
-                                _doorNumApt.isEmpty ||
-                                _street.isEmpty) {
-                              setState(() {
-                                _addressErrorText =
-                                    'Invalid address to send, all adress fields must be filled.';
-                              });
-                              return;
-                            }
-                            setState(() {
-                              _addressErrorText = '';
-                              _isLoading = true;
-                            });
-                            try {
-                              await FirebaseFirestore.instance
-                                  .collection('shippingDetails')
-                                  .doc(_addressDocId)
-                                  .set({
-                                'email':
-                                    FirebaseAuth.instance.currentUser!.email,
-                                'doorNumApt': _doorNumApt,
-                                'state': _state,
-                                'street': _street
-                              });
-                              setState(() {
-                                _isLoading = false;
-                                _isShowingSuccessMessage = true;
-                              });
-                              Timer(const Duration(seconds: 3), () {
-                                setState(() {
-                                  _isShowingSuccessMessage = false;
-                                });
-                              });
-                            } on FirebaseException catch (e) {
-                              setState(() {
-                                _addressErrorText = e.code;
-                                _isLoading = false;
-                              });
-                            }
-                          },
-                          child: const Text(
-                            'Update Address',
-                            style: TextStyle(fontSize: 18),
-                          ))
                     ],
                   ),
-                )
+                ),
               ],
             ),
             _isShowingSuccessMessage
@@ -524,7 +527,7 @@ class _ProfileState extends State<Profile> {
                       color: Colors.purple,
                     ),
                   )
-                : const SizedBox()
+                : const SizedBox(),
           ],
         ),
       ),
