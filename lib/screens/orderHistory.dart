@@ -122,16 +122,23 @@ class _OrderHistoryState extends State<OrderHistory> {
                                       ),
                                       placeholder: (context, url) {
                                         debugPrint(url);
-                                        return const CircularProgressIndicator();
+                                        return Container(
+                                            height: _width * 0.25,
+                                            width: _width * 0.25,
+                                            alignment: Alignment.center,
+                                            child:
+                                                const CircularProgressIndicator());
                                       },
                                       errorWidget: (context, url, error) =>
                                           Container(
                                               height: _width * 0.25,
                                               width: _width * 0.25,
                                               alignment: Alignment.center,
-                                              child: const Icon(
+                                              color: Colors.grey[50],
+                                              child: Icon(
                                                 Icons.error,
                                                 color: Colors.purple,
+                                                size: _width * 0.10,
                                               )),
                                     ),
                                     Flexible(

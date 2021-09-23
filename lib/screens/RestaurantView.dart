@@ -30,6 +30,7 @@ class _RestaurantViewState extends State<RestaurantView> {
                 .getRestaurantDetails(widget.restaurant['data']['email']),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
+                debugPrint(snapshot.error.toString());
                 return const Center(
                   child: Text(
                     'Oops...\n Could not load data',
@@ -43,6 +44,7 @@ class _RestaurantViewState extends State<RestaurantView> {
                 );
               }
               var snapmap = snapshot.data as List;
+
               return SizedBox(
                 height: MediaQuery.of(context).size.height,
                 child: Column(
@@ -186,7 +188,11 @@ class _RestaurantViewState extends State<RestaurantView> {
                         ),
                       ),
                       placeholder: (context, url) {
-                        return const CircularProgressIndicator();
+                        return Container(
+                            height: 200,
+                            width: double.infinity,
+                            alignment: Alignment.center,
+                            child: const CircularProgressIndicator());
                       },
                       errorWidget: (context, url, error) =>
                           const Icon(Icons.error),
@@ -200,6 +206,17 @@ class _RestaurantViewState extends State<RestaurantView> {
                         child: ListView(
                           shrinkWrap: true,
                           children: [
+                            snapmap.isEmpty
+                                ? const Center(
+                                    child: Text(
+                                    'This restaurant has not items added yet',
+                                    style: TextStyle(
+                                      overflow: TextOverflow.clip,
+                                      fontSize: 17,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ))
+                                : const SizedBox(),
                             ...(snapmap.map(
                               (e) => Card(
                                 child: Padding(

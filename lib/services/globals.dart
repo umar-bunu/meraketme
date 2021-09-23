@@ -18,7 +18,7 @@ final List<Map<String, List>> states = [
       'Umuahia North',
       'Umuahia South',
       'Umunneochi'
-    ]
+    ],
   },
   {
     'Adamawa': [

@@ -52,17 +52,6 @@ class FireStoreServices {
     }
   }
 
-  Future getShippingDetails() async {
-    var _query = await FirebaseFirestore.instance
-        .collection('shippingDetails')
-        .doc(FirebaseAuth.instance.currentUser!.email)
-        .collection('locations')
-        .get();
-    var _docs = _query.docs
-        .map((element) => {'id': element.id, 'data': element.data()});
-    return _docs.toList();
-  }
-
   Future getOrderHistory(user) async {
     try {
       debugPrint('19');
@@ -158,9 +147,10 @@ class FireStoreServices {
           .get();
       List _restaurants =
           _docs.docs.map((e) => {'id': e.id, 'data': e.data()}).toList();
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 6 && i < _restaurants.length; i++) {
         _restaurants.add(_restaurants[i]);
       }
+
       return _restaurants;
     } on FirebaseException catch (e) {
       return Future.error(e.code);
